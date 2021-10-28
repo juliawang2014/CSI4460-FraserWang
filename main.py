@@ -2,4 +2,4 @@
 
 import sys
 
-print("arguuments", str(sys.argv))
+print("arguuments:\t", sys.argv[1:])
