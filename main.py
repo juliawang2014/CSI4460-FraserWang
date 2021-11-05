@@ -18,7 +18,8 @@ def printModeTest(mode):
 def openImage():
     with Image.open("./media/eyes.png") as image:
         print("image opened")
-        print(list(image.getdata(band=None)))
+        #output first 10 pixels, don't want to completely clear the console output.
+        print(list(image.getdata(band=None))[0:10])
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
