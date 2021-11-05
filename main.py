@@ -20,7 +20,9 @@ def openImage():
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
         print("Total number of pixels: " + str(len(imageArray)))
-        print(imageArray[0:10])
+        size = image.size
+        print("Image size: " + str(size))
+        print("Inital data:   " + str(imageArray[0:10]))
         
         #section to set all blue values in pixels to 0 because I'm evil
         for i in range(len(imageArray)):
@@ -29,6 +31,11 @@ def openImage():
             
         #print out new data
         print("\nModified data: " + str(imageArray[0:10]))
+        
+        #put imageData back into new image
+        image2 = Image.new(mode="RGB", size=size)
+        image2.putdata(imageArray)
+        image2.show()
             
         
 
