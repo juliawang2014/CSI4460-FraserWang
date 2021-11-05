@@ -10,10 +10,13 @@ print("arguments:\t", sys.argv[1:], "\n")
 
 def printModeTest(mode, text):
     if mode == "e" or mode == "encode":
-        print("encode")
+        print("encode", "e")
         openImage(text)
     elif mode == "d" or mode == "decode":
         print("decode")
+        with Image.open("./media/encoded.png") as image:
+            decodeMessage(list(image.getdata(band=None)), image.size)
+        
         
 def openImage(text):
     with Image.open("./media/eyes.png") as image:
@@ -24,11 +27,11 @@ def openImage(text):
         print("Image size: " + str(size))
         print("Inital data: " + str(imageArray[0:10]))
         
-        #call our two functions to modify the image data in different ways.
+        #call our three functions to modify the image data in different ways.
         #the [:] is neccessary to pass the list by value instead of reference, avoiding changing it.
         removeBlue(imageArray[:], size)
         stripBit(imageArray[:], size, 0)
-        encodeMessage(imageArray, size, text)
+        encodeMessage(imageArray[:], size, text)
         
 def removeBlue(imageArray, size):   
     #set all blue values in pixels to 0 because I'm evil
@@ -69,6 +72,18 @@ def encodeMessage(imageArray, size, message):
     image2.putdata(imageArray)
     image2.show()
     
+def decodeMessage(imageArray, size):
+    #assume length of message for now, read in the first 128 bits for storage of 16 characters.
+    #if message is smaller than that it it will be gibberish.
+    message = ""
+    for i in range(128):
+        r = imageArray[i][0]
+        message = message + str(r % 2)
+        
+    print(message)
+        
+    
+        
 
     
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
@@ -89,7 +104,7 @@ def toggleBit(int_type, offset):
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
-    parser.add_argument("-t", "--text", dest = 'text', type = str, required = True, help = "Message to encode, binary string")
+    parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
     
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
