@@ -2,6 +2,7 @@
 
 #first argument is gonna be -m/mode e/encode/d/decode for Encode or Decode for now, then some sort of file input, gonna use a png image in local folder for now.
 
+from PIL import Image
 import argparse
 import sys
 
@@ -10,8 +11,14 @@ print("arguments:\t", sys.argv[1:], "\n")
 def printModeTest(mode):
     if mode == "e" or mode == "encode":
         print("encode")
+        openImage()
     elif mode == "d" or mode == "decode":
         print("decode")
+        
+def openImage():
+    with Image.open("./media/eyes.png") as image:
+        print("image opened")
+        print(list(image.getdata(band=None)))
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
