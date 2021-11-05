@@ -17,9 +17,20 @@ def printModeTest(mode):
         
 def openImage():
     with Image.open("./media/eyes.png") as image:
-        print("image opened")
         #output first 10 pixels, don't want to completely clear the console output.
-        print(list(image.getdata(band=None))[0:10])
+        imageArray = list(image.getdata(band=None))
+        print("Total number of pixels: " + str(len(imageArray)))
+        print(imageArray[0:10])
+        
+        #section to set all blue values in pixels to 0 because I'm evil
+        for i in range(len(imageArray)):
+            r, g, b = imageArray[i]
+            imageArray[i] = (r, g, 0)
+            
+        #print out new data
+        print("\nModified data: " + str(imageArray[0:10]))
+            
+        
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
