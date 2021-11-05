@@ -24,7 +24,11 @@ def openImage():
         print("Image size: " + str(size))
         print("Inital data:   " + str(imageArray[0:10]))
         
-        #section to set all blue values in pixels to 0 because I'm evil
+        removeBlue(imageArray, size)
+        
+
+        
+def removeBlue(imageArray, size):   #set all blue values in pixels to 0 because I'm evil
         for i in range(len(imageArray)):
             r, g, b = imageArray[i]
             imageArray[i] = (r, g, 0)
@@ -36,6 +40,7 @@ def openImage():
         image2 = Image.new(mode="RGB", size=size)
         image2.putdata(imageArray)
         image2.show()
+    
             
         
 
