@@ -9,14 +9,10 @@ def encryption(message, key):
     iv = b'1111111111111111'
     cipher = AES.new(key, AES.MODE_CBC, iv)
     data = message.encode('UTF-8')
-    #data = None
-    #with open(message, "rb") as f:
-    #    data = f.read()
     msg = cipher.encrypt(pad(data, 16))
     print(msg)
     with open("..\messages\message.txt", "wb") as file:
         file.write(msg)
-    #decryption(msg, key, iv)
 
 def decryption(message, key):
     key = key.encode('UTF-8')
