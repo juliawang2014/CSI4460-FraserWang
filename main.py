@@ -47,11 +47,11 @@ def encodeMessage(imageArray, size, message):
     saveImageArrayAsImage(imageArray, size)
     
 def decodeMessage(imageArray, size):
-    #assume length of message for now, read in the first 128 bits for storage of 16 characters.
-    #if message is smaller than that it it will be gibberish.
+    #get length of message and then extract
     message = ""
-    for i in range(128):
-        r = imageArray[i][0]
+    length = getMessageLength(imageArray)
+    for i in range(length):
+        r = imageArray[i+8][0]
         message = message + str(r % 2)
         
     print(message)
@@ -77,6 +77,7 @@ def getMessageLength(imageArray):
     print("Length of message in binary and decimal:")
     print(length)
     print(int(length, base=2))
+    return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
     #put imageData back into new image
