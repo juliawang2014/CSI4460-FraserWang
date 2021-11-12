@@ -2,6 +2,8 @@ import PIL.Image
 from itertools import product
 import math
 import random
+import argparse
+import random
 
 
 def smoothstep(t):
@@ -152,6 +154,7 @@ class PerlinNoiseFactory(object):
 
         return ret
 # USE CASE BELOW
+"""
 size = 200
 res = 40
 frames = 1
@@ -170,3 +173,45 @@ for t in range(frames):
 
     img.save("noiseframe{:03d}.png".format(t))
     print(t)
+"""
+def encryption(message):
+    with open(message, "rb") as f:
+        data = f.read()
+    random.seed(data)
+    print(random.random())
+    size = 200
+    res = (random.random() * 25)
+    frames = 1
+    frameres = 5
+    space_range = size//res
+    frame_range = frames//frameres
+
+    pnf = PerlinNoiseFactory(3, octaves=4, tile=(space_range, space_range, frame_range))
+
+    img = PIL.Image.new('L', (size, size))
+    for x in range(size):
+        for y in range(size):
+            n = pnf(x/res, y/res, 0)
+            #print(n)
+            img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
+
+    img.save("noiseframe.png")
+
+def decryption(message):
+    pass
+
+def main():
+    parser = argparse.ArgumentParser(description = "Perlin-noise")
+    parser.add_argument('-m', '--message', dest = 'message', type = str, required = True, help = "The txt file to encode/decode")
+    parser.add_argument('-t', '--type', dest = 'type', type = str, required = True, help = 'd for decode mode, e for encode mode. Default is encode mode')
+
+    args = parser.parse_args()
+
+    if (args.type == 'd'):
+        decryption(args.message)
+    else:
+        encryption(args.message)
+
+
+if __name__ == "__main__":
+    main()
