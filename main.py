@@ -26,13 +26,16 @@ def openImage(text):
         size = image.size
         print("Image size: " + str(size))
         print("Inital data: " + str(imageArray[0:10]))
+        print("Message to encode: " + text)
+        
+        binaryString = convertASCIItoBinaryString(text)
         
         #call our three functions to modify the image data in different ways.
         #the [:] is neccessary to pass the list by value instead of reference, avoiding changing it.
         
         #removeBlue(imageArray[:], size)
         #stripBit(imageArray[:], size, 0)
-        encodeMessage(imageArray[:], size, text)
+        encodeMessage(imageArray[:], size, binaryString)
     
 def encodeMessage(imageArray, size, message): 
     #encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
@@ -53,6 +56,8 @@ def decodeMessage(imageArray, size):
     for i in range(length):
         r = imageArray[i+8][0]
         message = message + str(r % 2)
+        
+    message = convertBinaryStringToASCII(message)
         
     print("\nDecoded message:\n" + message)
     
@@ -90,7 +95,6 @@ def convertASCIItoBinaryString(input):
     input = input.encode("ascii")
     for char in input:
         output += bin(char)[2:].zfill(8)
-    convertBinaryStringToASCII(output)
     return output
     
 def convertBinaryStringToASCII(input):
@@ -98,8 +102,7 @@ def convertBinaryStringToASCII(input):
     for i in range(int(len(input)/8)):
         #yeah I know the following line is a bit of a mess but hey it works
         output  += int(input[i*8:i*8+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
-    print(output)
-        
+    return output 
 
 
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
@@ -127,7 +130,7 @@ def main():
     #printModeTest(args.mode, "1010101010101010101010101010")
     
     
-    convertASCIItoBinaryString("hello world!")
+    #convertASCIItoBinaryString("hello world!")
     
     
 if __name__ == "__main__":
