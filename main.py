@@ -90,7 +90,16 @@ def convertASCIItoBinaryString(input):
     input = input.encode("ascii")
     for char in input:
         output += bin(char)[2:].zfill(8)
+    convertBinaryStringToASCII(output)
     return output
+    
+def convertBinaryStringToASCII(input):
+    output = ""
+    for i in range(int(len(input)/8)):
+        #yeah I know the following line is a bit of a mess but hey it works
+        output  += int(input[i*8:i*8+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
+    print(output)
+        
 
 
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
@@ -116,6 +125,9 @@ def main():
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
     #printModeTest(args.mode, "1010101010101010101010101010")
+    
+    
+    convertASCIItoBinaryString("hello world!")
     
     
 if __name__ == "__main__":
