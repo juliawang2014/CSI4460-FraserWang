@@ -29,16 +29,19 @@ def openImage(text):
         
         #call our three functions to modify the image data in different ways.
         #the [:] is neccessary to pass the list by value instead of reference, avoiding changing it.
-        removeBlue(imageArray[:], size)
-        stripBit(imageArray[:], size, 0)
+        
+        #removeBlue(imageArray[:], size)
+        #stripBit(imageArray[:], size, 0)
         encodeMessage(imageArray[:], size, text)
     
 def encodeMessage(imageArray, size, message): 
     #encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
     #message must be shorter than imageArray, no checking so be careful!
+    #now with message length at the beginning of everything!
+    setMessageLength(imageArray, len(message))
     for i in range(len(message)):
-        r, g, b = imageArray[i]
-        imageArray[i] = setBit(r, 0, int(message[i])), g, b
+        r, g, b = imageArray[i+8]
+        imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
         
     print("\nData with encoded binary message: " + str(imageArray[0:10]))
     saveImageArrayAsImage(imageArray, size)
@@ -52,7 +55,7 @@ def decodeMessage(imageArray, size):
         message = message + str(r % 2)
         
     print(message)
-    setMessageLength(imageArray, 2323757)
+    #setMessageLength(imageArray, 2323757)
     #getMessageLength(imageArray)
     
 def setMessageLength(imageArray, length):
@@ -66,19 +69,12 @@ def setMessageLength(imageArray, length):
     
     getMessageLength(imageArray)
     
-    
-    
-    
-    
-    
-    
-    
 def getMessageLength(imageArray):
     length = ""
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print("Length in binary and decimal:")
+    print("Length of message in binary and decimal:")
     print(length)
     print(int(length, base=2))
     
@@ -108,11 +104,11 @@ def toggleBit(int_type, offset):
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
-    #parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
+    parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
     
     args = parser.parse_args()
-    #printModeTest(args.mode, args.text)
-    printModeTest(args.mode, "1010101010101010101010101010")
+    printModeTest(args.mode, args.text)
+    #printModeTest(args.mode, "1010101010101010101010101010")
     
     
 if __name__ == "__main__":
