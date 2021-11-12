@@ -33,6 +33,7 @@ def openImage(text):
         stripBit(imageArray[:], size, 0)
         encodeMessage(imageArray[:], size, text)
         
+        
 def removeBlue(imageArray, size):   
     #set all blue values in pixels to 0 because I'm evil
     for i in range(len(imageArray)):
@@ -45,7 +46,7 @@ def removeBlue(imageArray, size):
     #put imageData back into new image
     image2 = Image.new(mode="RGB", size=size)
     image2.putdata(imageArray)
-    #image2.show()
+    #saveImageArrayAsImage(imageArray, size)
 
 def stripBit(imageArray, size, bit):  
     #0 for bit is LSB
@@ -57,7 +58,7 @@ def stripBit(imageArray, size, bit):
     #put imageData back into new image
     image2 = Image.new(mode="RGB", size=size)
     image2.putdata(imageArray)
-    #image2.show()
+    #saveImageArrayAsImage(imageArray, size)
     
 def encodeMessage(imageArray, size, message): 
     #encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
@@ -67,10 +68,7 @@ def encodeMessage(imageArray, size, message):
         imageArray[i] = setBit(r, 0, int(message[i])), g, b
         
     print("\nData with encoded binary message: " + str(imageArray[0:10]))
-    #put imageData back into new image
-    image2 = Image.new(mode="RGB", size=size)
-    image2.putdata(imageArray)
-    image2.show()
+    saveImageArrayAsImage(imageArray, size)
     
 def decodeMessage(imageArray, size):
     #assume length of message for now, read in the first 128 bits for storage of 16 characters.
@@ -81,11 +79,48 @@ def decodeMessage(imageArray, size):
         message = message + str(r % 2)
         
     print(message)
-        
+    setMessageLength(imageArray, 255)
+    #getMessageLength(imageArray)
     
-        
+def setMessageLength(imageArray, length):
+    strBinLength = bin(length)[2:]
+    strBinLength = strBinLength.zfill(24) #pad beginning with 0s to take up the full 24 bits
+    count = 0;
+    
+    print(str(imageArray[0:8]))
+    for i in range(8):
+        #looks messy but its just taking the length and encoding it into the first 8 pixels of the image 1 pixel at a time
+        tuple = setBit(imageArray[i][0], 0, int(strBinLength[count])), setBit(imageArray[i][1], 0, int(strBinLength[count+1])), setBit(imageArray[i][2], 0, int(strBinLength[count+2]))
+        imageArray[i] = tuple
+        count += 3
 
     
+    getMessageLength(imageArray)
+    
+    
+    
+    
+    
+    
+    
+    
+def getMessageLength(imageArray):
+    length = ""
+    for i in range(8):
+        for j in range(3):
+            length += str(imageArray[i][j] % 2)
+    print("Length in binary and decimal:")
+    print(length)
+    print(int(length, base=2))
+    
+def saveImageArrayAsImage(imageArray, size):
+    #put imageData back into new image
+    image = Image.new(mode="RGB", size=size)
+    image.putdata(imageArray)
+    #image2.show()
+    image.save("./media/encoded.png")
+
+
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
 def setBit(int_type, offset, value):
     if value == 1:
