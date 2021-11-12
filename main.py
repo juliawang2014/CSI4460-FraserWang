@@ -54,11 +54,10 @@ def decodeMessage(imageArray, size):
         r = imageArray[i+8][0]
         message = message + str(r % 2)
         
-    print(message)
-    #setMessageLength(imageArray, 2323757)
-    #getMessageLength(imageArray)
+    print("\nDecoded message:\n" + message)
     
 def setMessageLength(imageArray, length):
+    #storing the message length into the LSB of the first 8 pixels of the image, using all 3 colors. This accepts message of length up to 16,777,215 bits, pretty good!
     strBinLength = bin(length)[2:].zfill(24) #pad beginning with 0s to take up the full 24 bits, also remove the 0x that python puts in there
     count = 0;
     for i in range(8):
@@ -66,7 +65,6 @@ def setMessageLength(imageArray, length):
         tuple = setBit(imageArray[i][0], 0, int(strBinLength[count])), setBit(imageArray[i][1], 0, int(strBinLength[count+1])), setBit(imageArray[i][2], 0, int(strBinLength[count+2]))
         imageArray[i] = tuple
         count += 3
-    
     getMessageLength(imageArray)
     
 def getMessageLength(imageArray):
@@ -74,7 +72,7 @@ def getMessageLength(imageArray):
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print("Length of message in binary and decimal:")
+    print("\nLength of message in binary and decimal:")
     print(length)
     print(int(length, base=2))
     return int(length, base=2)
@@ -85,6 +83,14 @@ def saveImageArrayAsImage(imageArray, size):
     image.putdata(imageArray)
     #image2.show()
     image.save("./media/encoded.png")
+    
+def convertASCIItoBinaryString(input):
+    #take each character and pad to be 8 bits, add to output string and return entire string.
+    output = ""
+    input = input.encode("ascii")
+    for char in input:
+        output += bin(char)[2:].zfill(8)
+    return output
 
 
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
