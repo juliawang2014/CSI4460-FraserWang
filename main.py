@@ -104,10 +104,11 @@ def toggleBit(int_type, offset):
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
-    parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
+    #parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
     
     args = parser.parse_args()
-    printModeTest(args.mode, args.text)
+    #printModeTest(args.mode, args.text)
+    printModeTest(args.mode, "1010101010101010101010101010")
     
     
 if __name__ == "__main__":
