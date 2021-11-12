@@ -32,33 +32,6 @@ def openImage(text):
         removeBlue(imageArray[:], size)
         stripBit(imageArray[:], size, 0)
         encodeMessage(imageArray[:], size, text)
-        
-        
-def removeBlue(imageArray, size):   
-    #set all blue values in pixels to 0 because I'm evil
-    for i in range(len(imageArray)):
-        r, g, b = imageArray[i]
-        imageArray[i] = (r, g, 0)
-       
-    #print out new data
-    print("\nBlue data: " + str(imageArray[0:10]))
-        
-    #put imageData back into new image
-    image2 = Image.new(mode="RGB", size=size)
-    image2.putdata(imageArray)
-    #saveImageArrayAsImage(imageArray, size)
-
-def stripBit(imageArray, size, bit):  
-    #0 for bit is LSB
-    for i in range(len(imageArray)):
-        r, g, b = imageArray[i]
-        imageArray[i] = setBit(r, bit, 0), setBit(g, bit, 0), setBit(b, bit, 0)
-        
-    print("\nData without LSB: " + str(imageArray[0:10]))
-    #put imageData back into new image
-    image2 = Image.new(mode="RGB", size=size)
-    image2.putdata(imageArray)
-    #saveImageArrayAsImage(imageArray, size)
     
 def encodeMessage(imageArray, size, message): 
     #encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
@@ -79,21 +52,17 @@ def decodeMessage(imageArray, size):
         message = message + str(r % 2)
         
     print(message)
-    setMessageLength(imageArray, 255)
+    setMessageLength(imageArray, 2323757)
     #getMessageLength(imageArray)
     
 def setMessageLength(imageArray, length):
-    strBinLength = bin(length)[2:]
-    strBinLength = strBinLength.zfill(24) #pad beginning with 0s to take up the full 24 bits
+    strBinLength = bin(length)[2:].zfill(24) #pad beginning with 0s to take up the full 24 bits, also remove the 0x that python puts in there
     count = 0;
-    
-    print(str(imageArray[0:8]))
     for i in range(8):
         #looks messy but its just taking the length and encoding it into the first 8 pixels of the image 1 pixel at a time
         tuple = setBit(imageArray[i][0], 0, int(strBinLength[count])), setBit(imageArray[i][1], 0, int(strBinLength[count+1])), setBit(imageArray[i][2], 0, int(strBinLength[count+2]))
         imageArray[i] = tuple
         count += 3
-
     
     getMessageLength(imageArray)
     
@@ -148,3 +117,31 @@ def main():
     
 if __name__ == "__main__":
     main()
+    
+    
+    
+def removeBlue(imageArray, size):   
+    #set all blue values in pixels to 0 because I'm evil
+    for i in range(len(imageArray)):
+        r, g, b = imageArray[i]
+        imageArray[i] = (r, g, 0)
+       
+    #print out new data
+    print("\nBlue data: " + str(imageArray[0:10]))
+        
+    #put imageData back into new image
+    image2 = Image.new(mode="RGB", size=size)
+    image2.putdata(imageArray)
+    #saveImageArrayAsImage(imageArray, size)
+
+def stripBit(imageArray, size, bit):  
+    #0 for bit is LSB
+    for i in range(len(imageArray)):
+        r, g, b = imageArray[i]
+        imageArray[i] = setBit(r, bit, 0), setBit(g, bit, 0), setBit(b, bit, 0)
+        
+    print("\nData without LSB: " + str(imageArray[0:10]))
+    #put imageData back into new image
+    image2 = Image.new(mode="RGB", size=size)
+    image2.putdata(imageArray)
+    #saveImageArrayAsImage(imageArray, size)
