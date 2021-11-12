@@ -15,8 +15,7 @@ def printModeTest(mode, text):
     elif mode == "d" or mode == "decode":
         print("decode")
         with Image.open("./media/encoded.png") as image:
-            decodeMessage(list(image.getdata(band=None)), image.size)
-        
+            decodeMessage(list(image.getdata(band=None)), image.size)  
         
 def openImage(text):
     with Image.open("./media/eyes.png") as image:
@@ -58,7 +57,6 @@ def decodeMessage(imageArray, size):
         message = message + str(r % 2)
         
     message = convertBinaryStringToASCII(message)
-        
     print("\nDecoded message:\n" + message)
     
 def setMessageLength(imageArray, length):
@@ -77,9 +75,8 @@ def getMessageLength(imageArray):
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print("\nLength of message in binary and decimal:")
-    print(length)
-    print(int(length, base=2))
+    print("Binary length:  " + str(length))
+    print("Decimal length: " + str(int(length, base=2)))
     return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
@@ -104,7 +101,6 @@ def convertBinaryStringToASCII(input):
         output  += int(input[i*8:i*8+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
     return output 
 
-
 #following 2 functions derived from https://wiki.python.org/moin/BitManipulation
 def setBit(int_type, offset, value):
     if value == 1:
@@ -117,8 +113,6 @@ def setBit(int_type, offset, value):
 def toggleBit(int_type, offset):
     mask = 1 << offset
     return(int_type ^ mask)
-    
- 
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
@@ -128,16 +122,7 @@ def main():
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
     #printModeTest(args.mode, "1010101010101010101010101010")
-    
-    
-    #convertASCIItoBinaryString("hello world!")
-    
-    
-if __name__ == "__main__":
-    main()
-    
-    
-    
+
 def removeBlue(imageArray, size):   
     #set all blue values in pixels to 0 because I'm evil
     for i in range(len(imageArray)):
@@ -163,3 +148,6 @@ def stripBit(imageArray, size, bit):
     image2 = Image.new(mode="RGB", size=size)
     image2.putdata(imageArray)
     #saveImageArrayAsImage(imageArray, size)
+    
+if __name__ == "__main__":
+    main()
