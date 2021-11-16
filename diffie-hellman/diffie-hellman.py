@@ -1,3 +1,4 @@
+# Taken from http://sublimerobots.com/2015/01/simple-diffie-hellman-example-python/
 sharedPrime = 23    # p
 sharedBase = 5      # g
 
