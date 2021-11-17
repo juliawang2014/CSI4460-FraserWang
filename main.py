@@ -41,7 +41,8 @@ def openImage(text):
         
 def encodeMessage(imageArray, size, message): 
     """encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
-    now with message length at the beginning of everything!""" 
+    now with message length at the beginning of everything!
+    also with improved scrambling, can't quite read data without key so that's nice""" 
     
     #check max length string can be, either due to our size encoding limits or the number of pixels in the image
     maxLength = (len(imageArray) - 3) // 2 #divide by 2 because each bit of message is going to be stored between 2 pixels
@@ -50,19 +51,14 @@ def encodeMessage(imageArray, size, message):
     if (len(message) > maxLength):
         print(f"Message is too long!\nMessage length: {len(message)}\nMax length: {maxLength}")
         return
-    
     setMessageLength(imageArray, len(message))
-    
-    #for i in range(len(message)):
-    #    r, g, b = imageArray[i+8]
-    #    imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
     
     #pad out key with copies of itself to be the same length as the message we want to encode
     keyPadded = repeatStringToMatchLength(key, len(message))
     
+    #main loop, replace each 2 pixel section with encoded data from encodeIntoChunk
     for i in range(0, len(message)*2, 2):
         working = list(imageArray[i+8]) + list(imageArray[i+9])
-        #print(f"{working} {message[i//2]} {keyPadded[i//2]} {encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])}")
         imageArray[i+8:i+10] = encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])
         
     print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
@@ -83,13 +79,6 @@ def encodeIntoChunk(chunk, value, key):
             chunk[firstBit] = toggleBit(chunk[firstBit], 0)
         
     return [tuple(chunk[0:3]), tuple(chunk[3:6])]
-     
-def getLSBParity(list):
-    """given a list as input, return the parity of the LSBs in said list"""
-    parity = 0
-    for item in list:
-        parity = parity ^ (item % 2)
-    return parity    
     
 def decodeMessage(imageArray, size):
     """get raw binary message out of image"""
@@ -97,19 +86,16 @@ def decodeMessage(imageArray, size):
     message = ""
     length = getMessageLength(imageArray)
     keyPadded = repeatStringToMatchLength(key, length)
-    #for i in range(length):
-    #    r = imageArray[i+8][0]
-    #    message = message + str(r % 2)
     
-    
+    #extract, 2 pixels at a time
     for i in range(length):
         message = message + str(decodeChunk(list(imageArray[2*i+8]) + list(imageArray[2*i+9]), keyPadded[i]))
-        
-    print(message)
+
     message = convertBinaryStringToASCII(message)
     print(f"\nDecoded message:\n{message}")
 
 def decodeChunk(chunk, key):
+    """get parity of subset of chunk based on key value"""
     if key == "F":
         return getLSBParity(chunk)
     else:
@@ -170,6 +156,13 @@ def getArrayIndicesForParityEncoding(key):
         print("KEY ERROR")
         quit()
     return(firstBit, secondBit)
+    
+def getLSBParity(list):
+    """given a list as input, return the parity of the LSBs in said list"""
+    parity = 0
+    for item in list:
+        parity = parity ^ (item % 2)
+    return parity
 
 def setMessageLength(imageArray, length):
     """stores message length into the image in the first 8 pixels"""
@@ -243,7 +236,6 @@ def main():
     
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
-    #printModeTest(args.mode, "1010101010101010101010101010")
 
 def removeBlue(imageArray, size):   
     """set all blue values in pixels to 0 because I'm evil"""
