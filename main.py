@@ -6,13 +6,13 @@ from PIL import Image
 import argparse
 import sys
 
-print("arguments:\t", sys.argv[1:], "\n")
+print(f"arguments:\t {sys.argv[1:]} \n")
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 
 #code to switch behaviors based on mode
 def printModeTest(mode, text):
     if mode == "e" or mode == "encode":
-        print("encode", "e")
+        print("encode")
         openImage(text)
     elif mode == "d" or mode == "decode":
         print("decode")
@@ -24,10 +24,10 @@ def openImage(text):
     with Image.open("./media/eyes.png") as image:
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
-        print("Total number of pixels: " + str(len(imageArray)))
+        print(f"Total number of pixels: {str(len(imageArray))}")
         size = image.size
-        print("Image size: " + str(size))
-        print("Inital data: " + str(imageArray[0:10]))
+        print(f"Image size: {str(size)}")
+        print(f"Inital data: {str(imageArray[0:10])}")
         print(f"Message to encode:\n{text}")
         
         binaryString = convertASCIItoBinaryString(text)
@@ -55,7 +55,7 @@ def encodeMessage(imageArray, size, message):
         r, g, b = imageArray[i+8]
         imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
         
-    print("\nData with encoded binary message: " + str(imageArray[0:10]))
+    print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
     saveImageArrayAsImage(imageArray, size)
     
 def decodeMessage(imageArray, size):
@@ -68,7 +68,7 @@ def decodeMessage(imageArray, size):
         message = message + str(r % 2)
         
     message = convertBinaryStringToASCII(message)
-    print("\nDecoded message:\n" + message)
+    print(f"\nDecoded message:\n{message}")
 
 def setMessageLength(imageArray, length):
     """stores message length into the image in the first 8 pixels"""
@@ -86,8 +86,8 @@ def getMessageLength(imageArray):
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print("Binary length:  " + str(length))
-    print("Decimal length: " + str(int(length, base=2)))
+    print(f"Binary length:  {str(length)}")
+    print(f"Decimal length: {str(int(length, base=2))}")
     return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
@@ -147,7 +147,7 @@ def removeBlue(imageArray, size):
         imageArray[i] = (r, g, 0)
        
     #print out new data
-    print("\nBlue data: " + str(imageArray[0:10]))
+    print(f"\nBlue data: {str(imageArray[0:10])}")
         
     #put imageData back into new image
     image2 = Image.new(mode="RGB", size=size)
@@ -162,7 +162,7 @@ def stripBit(imageArray, size, bit):
         r, g, b = imageArray[i]
         imageArray[i] = setBit(r, bit, 0), setBit(g, bit, 0), setBit(b, bit, 0)
         
-    print("\nData without LSB: " + str(imageArray[0:10]))
+    print(f"\nData without LSB: {str(imageArray[0:10])}")
     #put imageData back into new image
     image2 = Image.new(mode="RGB", size=size)
     image2.putdata(imageArray)
