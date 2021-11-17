@@ -7,7 +7,7 @@ import argparse
 import sys
 
 print("arguments:\t", sys.argv[1:], "\n")
-key = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 
 #code to switch behaviors based on mode
 def printModeTest(mode, text):
@@ -28,7 +28,7 @@ def openImage(text):
         size = image.size
         print("Image size: " + str(size))
         print("Inital data: " + str(imageArray[0:10]))
-        print("Message to encode: " + text)
+        print(f"Message to encode:\n{text}")
         
         binaryString = convertASCIItoBinaryString(text)
         
@@ -41,8 +41,15 @@ def openImage(text):
         
 def encodeMessage(imageArray, size, message): 
     """encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
-    message must be shorter than imageArray, no checking so be careful!
     now with message length at the beginning of everything!""" 
+    
+    maxLength = (len(imageArray) - 3) // 2
+    if len(message) > 16777215:
+        maxLength = 16777215  
+    if (len(message) > maxLength):
+        print(f"Message is too long!\nMessage length: {len(message)}\nMax length: {maxLength}")
+        return
+    
     setMessageLength(imageArray, len(message))
     for i in range(len(message)):
         r, g, b = imageArray[i+8]
