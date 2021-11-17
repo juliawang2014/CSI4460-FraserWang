@@ -44,7 +44,7 @@ def encodeMessage(imageArray, size, message):
     now with message length at the beginning of everything!""" 
     
     #check max length string can be, either due to our size encoding limits or the number of pixels in the image
-    maxLength = (len(imageArray) - 3) // 2
+    maxLength = (len(imageArray) - 3) // 2 #divide by 2 because each bit of message is going to be stored between 2 pixels
     if len(message) > 16777215:
         maxLength = 16777215  
     if (len(message) > maxLength):
@@ -52,27 +52,124 @@ def encodeMessage(imageArray, size, message):
         return
     
     setMessageLength(imageArray, len(message))
-    for i in range(len(message)):
-        r, g, b = imageArray[i+8]
-        imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
+    
+    #for i in range(len(message)):
+    #    r, g, b = imageArray[i+8]
+    #    imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
     
     #pad out key with copies of itself to be the same length as the message we want to encode
-    keyPadded = repeatStringToMatchLength(key, message)
+    keyPadded = repeatStringToMatchLength(key, len(message))
+    
+    for i in range(0, len(message)*2, 2):
+        working = list(imageArray[i+8]) + list(imageArray[i+9])
+        #print(f"{working} {message[i//2]} {keyPadded[i//2]} {encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])}")
+        imageArray[i+8:i+10] = encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])
         
     print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
     saveImageArrayAsImage(imageArray, size)
+    
+    
+def encodeIntoChunk(chunk, value, key):
+    """chunk represents 2 pixels of imageData unrolled into an array of size 6, depending on the key value pick which parts to encode to then encode parity, change other values to random, then return list of tuples like imageArray"""
+    #cases for the possible values of key
+    if key == "F":
+        #special case for F key value, take parity of whole chunk
+        if value != getLSBParity(chunk):
+            chunk[0] = toggleBit(chunk[0], 0)
+    else:
+        #common logic for the other key values, add some randomness later
+        firstBit, secondBit = getArrayIndicesForParityEncoding(key)
+        if value != getLSBParity([chunk[firstBit], chunk[secondBit]]):
+            chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+        
+    return [tuple(chunk[0:3]), tuple(chunk[3:6])]
+     
+def getLSBParity(list):
+    """given a list as input, return the parity of the LSBs in said list"""
+    parity = 0
+    for item in list:
+        parity = parity ^ (item % 2)
+    return parity    
     
 def decodeMessage(imageArray, size):
     """get raw binary message out of image"""
     #get length of message and then extract
     message = ""
     length = getMessageLength(imageArray)
+    keyPadded = repeatStringToMatchLength(key, length)
+    #for i in range(length):
+    #    r = imageArray[i+8][0]
+    #    message = message + str(r % 2)
+    
+    
     for i in range(length):
-        r = imageArray[i+8][0]
-        message = message + str(r % 2)
+        message = message + str(decodeChunk(list(imageArray[2*i+8]) + list(imageArray[2*i+9]), keyPadded[i]))
         
+    print(message)
     message = convertBinaryStringToASCII(message)
     print(f"\nDecoded message:\n{message}")
+
+def decodeChunk(chunk, key):
+    if key == "F":
+        return getLSBParity(chunk)
+    else:
+        firstBit, secondBit = getArrayIndicesForParityEncoding(key)
+        return getLSBParity([chunk[firstBit], chunk[secondBit]])
+    
+def getArrayIndicesForParityEncoding(key):
+    """return a tuple with 2 items, corresponding to the indices to encode parity in/ the indices parity is encoded in"""
+    firstBit = 0
+    secondBit = 0
+    #cases for the possible values of key
+    if key == "0":
+        firstBit = 0
+        secondBit = 1
+    elif key == "1":
+        firstBit = 0
+        secondBit = 2
+    elif key == "2":
+        firstBit = 0
+        secondBit = 3
+    elif key == "3":
+        firstBit = 0
+        secondBit = 4
+    elif key == "4":
+        firstBit = 0
+        secondBit = 5
+    elif key == "5":
+        firstBit = 1
+        secondBit = 2
+    elif key == "6":
+        firstBit = 1
+        secondBit = 3
+    elif key == "7":
+        firstBit = 1
+        secondBit = 4
+    elif key == "8":
+        firstBit = 1
+        secondBit = 5
+    elif key == "9":
+        firstBit = 2
+        secondBit = 3
+    elif key == "A":
+        firstBit = 2
+        secondBit = 4
+    elif key == "B":
+        firstBit = 2
+        secondBit = 5
+    elif key == "C":
+        firstBit = 3
+        secondBit = 4
+    elif key == "D":
+        firstBit = 3
+        secondBit = 5
+    elif key == "E":
+        firstBit = 4
+        secondBit = 5
+    else:
+        print("KEY ERROR")
+        quit()
+    return(firstBit, secondBit)
 
 def setMessageLength(imageArray, length):
     """stores message length into the image in the first 8 pixels"""
@@ -134,10 +231,10 @@ def toggleBit(int_type, offset):
     mask = 1 << offset
     return(int_type ^ mask)
     
-def repeatStringToMatchLength(subject, target):
+def repeatStringToMatchLength(subject, targetLen):
     """repeats subject string enough times to be larger than target string then cuts off any extra
     code taken from https://stackoverflow.com/questions/3391076/repeat-string-to-certain-length"""
-    return (subject * (len(target) // len(subject) + 1))[:len(target)]
+    return (subject * (targetLen // len(subject) + 1))[:targetLen]
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
