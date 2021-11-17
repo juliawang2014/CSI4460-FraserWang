@@ -43,6 +43,7 @@ def encodeMessage(imageArray, size, message):
     """encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
     now with message length at the beginning of everything!""" 
     
+    #check max length string can be, either due to our size encoding limits or the number of pixels in the image
     maxLength = (len(imageArray) - 3) // 2
     if len(message) > 16777215:
         maxLength = 16777215  
@@ -54,6 +55,9 @@ def encodeMessage(imageArray, size, message):
     for i in range(len(message)):
         r, g, b = imageArray[i+8]
         imageArray[i+8] = setBit(r, 0, int(message[i])), g, b
+    
+    #pad out key with copies of itself to be the same length as the message we want to encode
+    keyPadded = repeatStringToMatchLength(key, message)
         
     print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
     saveImageArrayAsImage(imageArray, size)
@@ -125,11 +129,15 @@ def setBit(int_type, offset, value):
         mask = ~(1 << offset)
         return(int_type & mask)
 
-
 def toggleBit(int_type, offset):
     """toggles a given bit inside an integer"""
     mask = 1 << offset
     return(int_type ^ mask)
+    
+def repeatStringToMatchLength(subject, target):
+    """repeats subject string enough times to be larger than target string then cuts off any extra
+    code taken from https://stackoverflow.com/questions/3391076/repeat-string-to-certain-length"""
+    return (subject * (len(target) // len(subject) + 1))[:len(target)]
 
 def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
