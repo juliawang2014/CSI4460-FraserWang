@@ -45,11 +45,11 @@ def encodeMessage(imageArray, size, message):
     also with improved scrambling, can't quite read data without key so that's nice""" 
     
     #check max length string can be, either due to our size encoding limits or the number of pixels in the image
-    maxLength = (len(imageArray) - 3) // 2 #divide by 2 because each bit of message is going to be stored between 2 pixels
+    maxLength = len(imageArray) // 2 - 8 #divide by 2 because each bit of message is going to be stored between 2 pixels
     if len(message) > 16777215:
         maxLength = 16777215  
     if (len(message) > maxLength):
-        print(f"Message is too long!\nMessage length: {len(message)}\nMax length: {maxLength}")
+        print(f"Message is too long!\nMessage length (in characters): {len(message)//8}\nMax length (in characters): {maxLength//8}")
         return
     setMessageLength(imageArray, len(message))
     
