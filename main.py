@@ -8,6 +8,7 @@ import sys
 
 print("arguments:\t", sys.argv[1:], "\n")
 
+#code to switch behaviors based on mode
 def printModeTest(mode, text):
     if mode == "e" or mode == "encode":
         print("encode", "e")
@@ -16,8 +17,9 @@ def printModeTest(mode, text):
         print("decode")
         with Image.open("./media/encoded.png") as image:
             decodeMessage(list(image.getdata(band=None)), image.size)  
-        
+            
 def openImage(text):
+    """open our image into memory so we can encode"""
     with Image.open("./media/eyes.png") as image:
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
@@ -35,11 +37,11 @@ def openImage(text):
         #removeBlue(imageArray[:], size)
         #stripBit(imageArray[:], size, 0)
         encodeMessage(imageArray[:], size, binaryString)
-    
+        
 def encodeMessage(imageArray, size, message): 
-    #encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
-    #message must be shorter than imageArray, no checking so be careful!
-    #now with message length at the beginning of everything!
+    """encodes a message into lsb of red pixels of a given image, message should be a string consisting of 0s and 1s.
+    message must be shorter than imageArray, no checking so be careful!
+    now with message length at the beginning of everything!""" 
     setMessageLength(imageArray, len(message))
     for i in range(len(message)):
         r, g, b = imageArray[i+8]
@@ -49,6 +51,7 @@ def encodeMessage(imageArray, size, message):
     saveImageArrayAsImage(imageArray, size)
     
 def decodeMessage(imageArray, size):
+    """get raw binary message out of image"""
     #get length of message and then extract
     message = ""
     length = getMessageLength(imageArray)
@@ -58,8 +61,9 @@ def decodeMessage(imageArray, size):
         
     message = convertBinaryStringToASCII(message)
     print("\nDecoded message:\n" + message)
-    
+
 def setMessageLength(imageArray, length):
+    """stores message length into the image in the first 8 pixels"""
     #storing the message length into the LSB of the first 8 pixels of the image, using all 3 colors. This accepts message of length up to 16,777,215 bits, pretty good!
     strBinLength = bin(length)[2:].zfill(24) #pad beginning with 0s to take up the full 24 bits, also remove the 0x that python puts in there
     for i in range(8):
@@ -69,6 +73,7 @@ def setMessageLength(imageArray, length):
     getMessageLength(imageArray)
     
 def getMessageLength(imageArray):
+    """gets the message length out of the first 8 pixels"""
     length = ""
     for i in range(8):
         for j in range(3):
@@ -78,6 +83,7 @@ def getMessageLength(imageArray):
     return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
+    """saves image array from memory to disk"""
     #put imageData back into new image
     image = Image.new(mode="RGB", size=size)
     image.putdata(imageArray)
@@ -85,6 +91,7 @@ def saveImageArrayAsImage(imageArray, size):
     image.save("./media/encoded.png")
     
 def convertASCIItoBinaryString(input):
+    """convert ascii string to string containing binary representation"""
     #take each character and pad to be 8 bits, add to output string and return entire string.
     output = ""
     input = input.encode("ascii")
@@ -93,13 +100,14 @@ def convertASCIItoBinaryString(input):
     return output
     
 def convertBinaryStringToASCII(input):
+    """covert binary string into ASCII equivalent"""
     output = ""
     for i in range(0, int(len(input)), 8):
         #yeah I know the following line is a bit of a mess but hey it works
         output  += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
     return output 
 
-#following 2 functions derived from https://wiki.python.org/moin/BitManipulation
+following 2 functions derived from https://wiki.python.org/moin/BitManipulation, this one sets a specific bit
 def setBit(int_type, offset, value):
     if value == 1:
         mask = 1 << offset
@@ -107,8 +115,10 @@ def setBit(int_type, offset, value):
     if value == 0:
         mask = ~(1 << offset)
         return(int_type & mask)
-        
+
+
 def toggleBit(int_type, offset):
+    """toggles a given bit inside an integer"""
     mask = 1 << offset
     return(int_type ^ mask)
 
@@ -122,7 +132,7 @@ def main():
     #printModeTest(args.mode, "1010101010101010101010101010")
 
 def removeBlue(imageArray, size):   
-    #set all blue values in pixels to 0 because I'm evil
+    """set all blue values in pixels to 0 because I'm evil"""
     for i in range(len(imageArray)):
         r, g, b = imageArray[i]
         imageArray[i] = (r, g, 0)
@@ -135,7 +145,9 @@ def removeBlue(imageArray, size):
     image2.putdata(imageArray)
     #saveImageArrayAsImage(imageArray, size)
 
-def stripBit(imageArray, size, bit):  
+
+def stripBit(imageArray, size, bit): 
+    """strip out specified bit from all color information in image"""
     #0 for bit is LSB
     for i in range(len(imageArray)):
         r, g, b = imageArray[i]
