@@ -7,6 +7,7 @@ import argparse
 import sys
 
 print("arguments:\t", sys.argv[1:], "\n")
+key = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
 
 #code to switch behaviors based on mode
 def printModeTest(mode, text):
@@ -107,8 +108,9 @@ def convertBinaryStringToASCII(input):
         output  += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
     return output 
 
-following 2 functions derived from https://wiki.python.org/moin/BitManipulation, this one sets a specific bit
+
 def setBit(int_type, offset, value):
+    """following 2 functions derived from https://wiki.python.org/moin/BitManipulation, this one sets a specific bit"""
     if value == 1:
         mask = 1 << offset
         return(int_type | mask)
