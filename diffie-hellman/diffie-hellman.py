@@ -1,4 +1,5 @@
 # Taken from http://sublimerobots.com/2015/01/simple-diffie-hellman-example-python/
+"""
 sharedPrime = 23    # p
 sharedBase = 5      # g
 
@@ -27,3 +28,9 @@ print( "    Alice Shared Secret: ", aliceSharedSecret )
 # Bob Computes Shared Secret: s = A^b mod p
 bobSharedSecret = (A**bobSecret) % sharedPrime
 print( "    Bob Shared Secret: ", bobSharedSecret )
+"""
+def computeKey(sharedPrime, sharedBase, secret):
+    return (sharedBase**secret) % sharedPrime
+
+def computeSharedSecret(key, secret, sharedPrime):
+    return (key**secret) % sharedPrime

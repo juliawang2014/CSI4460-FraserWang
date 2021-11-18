@@ -23,7 +23,7 @@ def decryption(message, key):
     plaintext = cipher.decrypt(data)
     print(plaintext)
 
-
+#Everything below can be commented out later
 def driver(message, mode, key):
     if mode == 'd':
         decryption(message, key)
