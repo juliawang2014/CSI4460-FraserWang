@@ -201,7 +201,7 @@ def decryption(message):
     pass
 
 #Everything below can be commented out later
-
+"""
 def main():
     parser = argparse.ArgumentParser(description = "Perlin-noise")
     parser.add_argument('-m', '--message', dest = 'message', type = str, required = True, help = "The txt file to encode/decode")
@@ -217,3 +217,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""

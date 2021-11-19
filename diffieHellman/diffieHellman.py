@@ -47,7 +47,5 @@ def dhReceive(peer_public_key, parameters):
         salt=None,
         info=b'handshake data',
     ).derive(shared_key)
-    print(derived_key) #change this to a return later
+    return derived_key
 
-a, b = dhSend()
-dhReceive(a, b)

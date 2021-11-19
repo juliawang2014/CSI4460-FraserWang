@@ -24,6 +24,7 @@ def decryption(message, key):
     print(plaintext)
 
 #Everything below can be commented out later
+"""
 def driver(message, mode, key):
     if mode == 'd':
         decryption(message, key)
@@ -41,3 +42,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
