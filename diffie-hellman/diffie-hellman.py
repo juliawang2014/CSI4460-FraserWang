@@ -1,36 +1,53 @@
-# Taken from http://sublimerobots.com/2015/01/simple-diffie-hellman-example-python/
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dh
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 """
-sharedPrime = 23    # p
-sharedBase = 5      # g
+parameters = dh.generate_parameters(generator=2, key_size=512)
 
-aliceSecret = 6     # a
-bobSecret = 15      # b
+private_key = parameters.generate_private_key()
+peer_public_key = parameters.generate_private_key().public_key()
+shared_key = private_key.exchange(peer_public_key)
+derived_key = HKDF(
+    algorithm=hashes.SHA256(),
+    length=32,
+    salt=None,
+    info=b'handshake data',
+).derive(shared_key)
 
-# Begin
-print( "Publicly Shared Variables:")
-print( "    Publicly Shared Prime: " , sharedPrime )
-print( "    Publicly Shared Base:  " , sharedBase )
-
-# Alice Sends Bob A = g^a mod p
-A = (sharedBase**aliceSecret) % sharedPrime
-print( "\n  Alice Sends Over Public Chanel: " , A )
-
-# Bob Sends Alice B = g^b mod p
-B = (sharedBase**bobSecret) % sharedPrime
-print( "\n  Bob Sends Over Public Chanel: ", B )
-
-print( "\n------------\n" )
-print( "Privately Calculated Shared Secret:" )
-# Alice Computes Shared Secret: s = B^a mod p
-aliceSharedSecret = (B ** aliceSecret) % sharedPrime
-print( "    Alice Shared Secret: ", aliceSharedSecret )
-
-# Bob Computes Shared Secret: s = A^b mod p
-bobSharedSecret = (A**bobSecret) % sharedPrime
-print( "    Bob Shared Secret: ", bobSharedSecret )
+private_key_2 = parameters.generate_private_key()
+peer_public_key_2 = parameters.generate_private_key().public_key()
+shared_key_2 = private_key_2.exchange(peer_public_key_2)
+derived_key_2 = HKDF(
+    algorithm=hashes.SHA256(),
+    length=32,
+    salt=None,
+    info=b'handshake data',
+).derive(shared_key_2)
+print("Base parameters")
+print(parameters.parameter_numbers().p)
+print(parameters.parameter_numbers().g)
+print("Peer public key 1 derived parameters")
+print(peer_public_key.public_numbers().parameter_numbers.p)
+print(peer_public_key.public_numbers().parameter_numbers.g)
+print("Peer public key 2 derived parameters")
+print(peer_public_key_2.public_numbers().parameter_numbers.p)
+print(peer_public_key_2.public_numbers().parameter_numbers.g)
 """
-def computeKey(sharedPrime, sharedBase, secret):
-    return (sharedBase**secret) % sharedPrime
+def dhSend():
+    parameters = dh.generate_parameters(generator=2, key_size=512)
+    private_key = parameters.generate_private_key()
+    return private_key.public_key(), parameters
 
-def computeSharedSecret(key, secret, sharedPrime):
-    return (key**secret) % sharedPrime
+def dhReceive(peer_public_key, parameters):
+    private_key = parameters.generate_private_key()
+    shared_key = private_key.exchange(peer_public_key)
+    derived_key = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=None,
+        info=b'handshake data',
+    ).derive(shared_key)
+    print(derived_key) #change this to a return later
+
+a, b = dhSend()
+dhReceive(a, b)
