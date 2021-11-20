@@ -178,7 +178,7 @@ def encryption(message):
     with open(message, "rb") as f:
         data = f.read()
     random.seed(data)
-    print(random.random())
+    #print(random.random())
     size = 200
     res = (random.random() * 25)
     frames = 1

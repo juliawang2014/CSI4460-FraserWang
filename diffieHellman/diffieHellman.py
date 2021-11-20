@@ -38,14 +38,15 @@ def dhSend():
     private_key = parameters.generate_private_key()
     return private_key.public_key(), parameters
 
-def dhReceive(peer_public_key, parameters):
+def dhReceive(peer_public_key, parameters, message):
     private_key = parameters.generate_private_key()
     shared_key = private_key.exchange(peer_public_key)
+    """
     derived_key = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
         salt=None,
-        info=b'handshake data',
+        info=message,
     ).derive(shared_key)
-    return derived_key
-
+    """
+    return shared_key
