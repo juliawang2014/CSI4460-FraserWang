@@ -1,27 +1,22 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
-import argparse
+from base64 import b64decode, b64encode
 
 def encryption(message, key):
-    #key = get_random_bytes(16)
-    key = key.encode('UTF-8')
-    iv = b'1111111111111111'
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key, AES.MODE_CBC)
     data = message.encode('UTF-8')
-    msg = cipher.encrypt(pad(data, 16))
-    print(msg)
-    with open("..\messages\message.txt", "wb") as file:
-        file.write(msg)
+    msg = cipher.encrypt(pad(data, AES.block_size))
+    iv = b64encode(cipher.iv).decode('UTF-8')
+    msg = b64encode(msg).decode('UTF-8')
+    return msg, iv
 
-def decryption(message, key):
-    key = key.encode('UTF-8')
-    iv = b'1111111111111111'
-    with open(message, "rb") as f:
-        data = f.read()
+def decryption(message, key, iv):
+    iv = b64decode(iv)
+    message = b64decode(message)
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    plaintext = cipher.decrypt(data)
-    print(plaintext)
+    plaintext = unpad(cipher.decrypt(message), AES.block_size)
+    print(plaintext.decode('UTF-8'))
+    
 
 #Everything below can be commented out later
 """

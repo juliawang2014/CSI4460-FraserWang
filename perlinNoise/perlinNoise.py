@@ -5,6 +5,7 @@ import random
 import argparse
 import random
 
+#adapted from https://eev.ee/blog/2016/05/29/perlin-noise/
 
 def smoothstep(t):
     """Smooth curve with a zero derivative at 0 and 1, making it useful for
@@ -175,9 +176,9 @@ for t in range(frames):
     print(t)
 """
 def encryption(message):
-    with open(message, "rb") as f:
-        data = f.read()
-    random.seed(data)
+    #with open(message, "rb") as f:
+    #    data = f.read()
+    random.seed(message)
     #print(random.random())
     size = 200
     res = (random.random() * 25)
