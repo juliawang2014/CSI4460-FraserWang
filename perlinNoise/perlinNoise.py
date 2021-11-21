@@ -201,6 +201,21 @@ def encryption(message):
 def decryption(message):
     pass
 
+wrappedPNF = PerlinNoiseFactory(1, octaves=4, unbias=True)
+cord = 0.5
+
+def PerlinNoiseFactoryWrapper():
+    """Wrapper for the perlin noise factory function, gives random perlin noise on command
+    Stays initiazed, moves around noise grid every successive time the function is called
+    returns true if positive or zero value from wrappedPNF, false if negative"""
+    global cord
+    value = wrappedPNF(cord)
+    cord = cord + 1
+    if value >= 0:
+        return True
+    else:
+        return False
+
 #Everything below can be commented out later
 """
 def main():
