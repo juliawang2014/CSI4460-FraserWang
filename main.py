@@ -71,13 +71,46 @@ def encodeIntoChunk(chunk, value, key):
     #cases for the possible values of key
     if key == "F":
         #special case for F key value, take parity of whole chunk after some scrambling
+        for i in range(3):
+            flipIndex = pn.PerlinNoiseFactoryWrapper(5)
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[flipIndex] = toggleBit(chunk[flipIndex], 0)
         if value != getLSBParity(chunk):
-            chunk[0] = toggleBit(chunk[0], 0)
+            randomIndex = pn.PerlinNoiseFactoryWrapper(5)
+            chunk[randomIndex] = toggleBit(chunk[randomIndex], 0)
     else:
-        #common logic for the other key values, add some randomness later
+        #common logic for the other key values, encode random value into random parity pairs after inital encoding
         firstBit, secondBit = getArrayIndicesForParityEncoding(key)
         if value != getLSBParity([chunk[firstBit], chunk[secondBit]]):
-            chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            else:
+                chunk[secondBit] = toggleBit(chunk[secondBit], 0)
+
+        #do our scrambling now    
+        indexList = [0, 1, 2, 3, 4, 5]
+        #remove the ones we already the actual data into
+        indexList.remove(firstBit)
+        indexList.remove(secondBit)
+
+        #get 2 random indexes to maybe reverse parity of
+        firstBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
+        indexList.remove(firstBit)
+        secondBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
+        indexList.remove(secondBit)
+        if pn.PerlinNoiseFactoryWrapper(1):
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            else:
+                chunk[secondBit] = toggleBit(chunk[secondBit], 0)
+
+        #2 items left in indexList, maybe reverse parity of them
+        if pn.PerlinNoiseFactoryWrapper(1):
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[indexList[0]] = toggleBit(chunk[indexList[0]], 0)
+            else:
+                chunk[indexList[1]] = toggleBit(chunk[indexList[1]], 0)       
+        
         
     return [tuple(chunk[0:3]), tuple(chunk[3:6])]
     
