@@ -196,7 +196,7 @@ def encryption(message):
             #print(n)
             img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
 
-    img.save("noiseframe.png")
+    img.save("perlinNoise\\noiseframe.png")
 
 def decryption(message):
     pass

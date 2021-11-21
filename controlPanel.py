@@ -42,8 +42,10 @@ while(active):
                 m, iv = AES.encryption(message, key.get_key())
                 ivector.set_iv(iv)
                 msg.set_message(m)
+                print("Cipher text: {}".format(msg.get_message()))
             elif choice == "2":
                 perlinNoise.encryption(msg.get_message())
+                print("Perlin Noise frame saved at perlinNoise\\noiseFrame.png")
             elif choice == "3":
                 notSent = False
             elif choice == "4":
@@ -51,7 +53,8 @@ while(active):
             else:
                 print("Invalid input, try again")
     elif mode == "2":
-        AES.decryption(msg.get_message(), key.get_key(), ivector.get_iv())
+        msg.set_message(AES.decryption(msg.get_message(), key.get_key(), ivector.get_iv()))
+        print("Decrypted message: {}".format(msg.get_message()))
     elif mode == "3":
         active = False
     else:

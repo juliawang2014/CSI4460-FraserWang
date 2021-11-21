@@ -15,7 +15,7 @@ def decryption(message, key, iv):
     message = b64decode(message)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = unpad(cipher.decrypt(message), AES.block_size)
-    print(plaintext.decode('UTF-8'))
+    return plaintext.decode('UTF-8')
     
 
 #Everything below can be commented out later
