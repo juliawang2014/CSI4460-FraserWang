@@ -5,6 +5,7 @@ import random
 import argparse
 import random
 
+#adapted from https://eev.ee/blog/2016/05/29/perlin-noise/
 
 def smoothstep(t):
     """Smooth curve with a zero derivative at 0 and 1, making it useful for
@@ -175,10 +176,10 @@ for t in range(frames):
     print(t)
 """
 def encryption(message):
-    with open(message, "rb") as f:
-        data = f.read()
-    random.seed(data)
-    print(random.random())
+    #with open(message, "rb") as f:
+    #    data = f.read()
+    random.seed(message)
+    #print(random.random())
     size = 200
     res = (random.random() * 25)
     frames = 1
@@ -195,13 +196,13 @@ def encryption(message):
             #print(n)
             img.putpixel((x, y), int((n + 1) / 2 * 255 + 0.5))
 
-    img.save("noiseframe.png")
+    img.save("perlinNoise\\noiseframe.png")
 
 def decryption(message):
     pass
 
 #Everything below can be commented out later
-
+"""
 def main():
     parser = argparse.ArgumentParser(description = "Perlin-noise")
     parser.add_argument('-m', '--message', dest = 'message', type = str, required = True, help = "The txt file to encode/decode")
@@ -217,3 +218,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""

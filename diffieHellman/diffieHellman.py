@@ -1,6 +1,7 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
 """
 parameters = dh.generate_parameters(generator=2, key_size=512)
 
@@ -33,13 +34,13 @@ print("Peer public key 2 derived parameters")
 print(peer_public_key_2.public_numbers().parameter_numbers.p)
 print(peer_public_key_2.public_numbers().parameter_numbers.g)
 """
-def dhSend():
-    parameters = dh.generate_parameters(generator=2, key_size=512)
-    private_key = parameters.generate_private_key()
-    return private_key.public_key(), parameters
 
-def dhReceive(peer_public_key, parameters):
-    private_key = parameters.generate_private_key()
+_parameters = dh.generate_parameters(generator=2, key_size=512)
+
+def getSharedKey():
+    #parameters = dh.generate_parameters(generator=2, key_size=512)
+    private_key = _parameters.generate_private_key()
+    peer_public_key = _parameters.generate_private_key().public_key()
     shared_key = private_key.exchange(peer_public_key)
     derived_key = HKDF(
         algorithm=hashes.SHA256(),
@@ -47,7 +48,5 @@ def dhReceive(peer_public_key, parameters):
         salt=None,
         info=b'handshake data',
     ).derive(shared_key)
-    print(derived_key) #change this to a return later
+    return derived_key
 
-a, b = dhSend()
-dhReceive(a, b)
