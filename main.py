@@ -5,6 +5,7 @@
 from PIL import Image
 import argparse
 import sys
+import perlinNoise.perlinNoise as pn
 
 print(f"arguments:\t {sys.argv[1:]} \n")
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
@@ -69,7 +70,7 @@ def encodeIntoChunk(chunk, value, key):
     """chunk represents 2 pixels of imageData unrolled into an array of size 6, depending on the key value pick which parts to encode to then encode parity, change other values to random, then return list of tuples like imageArray"""
     #cases for the possible values of key
     if key == "F":
-        #special case for F key value, take parity of whole chunk
+        #special case for F key value, take parity of whole chunk after some scrambling
         if value != getLSBParity(chunk):
             chunk[0] = toggleBit(chunk[0], 0)
     else:
@@ -233,7 +234,7 @@ def main():
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
     parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
-    
+
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
 
