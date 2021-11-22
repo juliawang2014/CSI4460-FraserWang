@@ -36,7 +36,7 @@ while(active):
         message = input("Input message to send: ")
         notSent = True
         while(notSent):
-            choice = input("Enter 1 to add AES encryption, enter 2 to add Perlin Noise, enter 3 to send the message using steganography, enter 4 to go back\n")
+            choice = input("Enter 1 to add AES encryption, enter 2 to send the message using steganography, enter 3 to go back\n")
             if choice == "1":
                 key.set_key(diffieHellman.getSharedKey())
                 m, iv = AES.encryption(message, key.get_key())
@@ -44,11 +44,8 @@ while(active):
                 msg.set_message(m)
                 print("Cipher text: {}".format(msg.get_message()))
             elif choice == "2":
-                perlinNoise.encryption(msg.get_message())
-                print("Perlin Noise frame saved at perlinNoise\\noiseFrame.png")
-            elif choice == "3":
                 notSent = False
-            elif choice == "4":
+            elif choice == "3":
                 notSent = False
             else:
                 print("Invalid input, try again")
