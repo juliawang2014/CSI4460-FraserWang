@@ -93,19 +93,21 @@ def encodeIntoChunk(chunk, value, key):
         indexList.remove(firstBit)
         indexList.remove(secondBit)
 
-        #get 2 random indexes to maybe reverse parity of
+        #get 2 random indexes to encode random parity into
         firstBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
         indexList.remove(firstBit)
         secondBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
         indexList.remove(secondBit)
-        if pn.PerlinNoiseFactoryWrapper(1):
+        parity = pn.PerlinNoiseFactoryWrapper(1)
+        if parity != getLSBParity([chunk[firstBit], chunk[secondBit]]):
             if pn.PerlinNoiseFactoryWrapper(1):
                 chunk[firstBit] = toggleBit(chunk[firstBit], 0)
             else:
                 chunk[secondBit] = toggleBit(chunk[secondBit], 0)
 
-        #2 items left in indexList, maybe reverse parity of them
-        if pn.PerlinNoiseFactoryWrapper(1):
+        #2 items left in indexList, encode random parity into them
+        parity = pn.PerlinNoiseFactoryWrapper(1)
+        if parity != getLSBParity([chunk[indexList[0]], chunk[indexList[1]]]):
             if pn.PerlinNoiseFactoryWrapper(1):
                 chunk[indexList[0]] = toggleBit(chunk[indexList[0]], 0)
             else:
