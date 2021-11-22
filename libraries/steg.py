@@ -33,8 +33,8 @@ def decodeMessageFromImage(imagePath, inputKey="0123456789ABCDEF0123456789ABCDEF
     with Image.open(imagePath) as image:
         return decodeMessage(list(image.getdata(band=None)), image.size) 
 
-#code to switch behaviors based on mode
 def printModeTest(mode, text):
+    """code to switch behaviors based on mode, not used unless python program is called by itself"""
     if mode == "e" or mode == "encode":
         print("encode")
         openImage(text)
@@ -44,7 +44,8 @@ def printModeTest(mode, text):
             decodeMessage(list(image.getdata(band=None)), image.size)  
             
 def openImage(text):
-    """open our image into memory so we can encode"""
+    """open our image into memory so we can encode
+    not used unless file is called by itself"""
     with Image.open("./media/eyes.png") as image:
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
@@ -293,6 +294,7 @@ def repeatStringToMatchLength(subject, targetLen):
     return (subject * (targetLen // len(subject) + 1))[:targetLen]
 
 def main():
+    """not used unless file is called by itself"""
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
     parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
