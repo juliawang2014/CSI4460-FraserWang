@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-#first argument is gonna be -m/mode e/encode/d/decode for Encode or Decode for now, then some sort of file input, gonna use a png image in local folder for now.
-
 from PIL import Image
 import argparse
 import sys
