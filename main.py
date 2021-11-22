@@ -10,6 +10,7 @@ import perlinNoise.perlinNoise as pn
 print(f"arguments:\t {sys.argv[1:]} \n")
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 outputLocation = "./media/encoded.png"
+doLogOutput = True
 
 def encodeMessageIntoImage(message, imagePath, outputPath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
     """method to encode message into image with specified message, path to image intput/output, and key"""
@@ -18,6 +19,12 @@ def encodeMessageIntoImage(message, imagePath, outputPath, inputKey="0123456789A
     with Image.open(imagePath) as image:
         imageArray = list(image.getdata(band=None))
         binaryString = convertASCIItoBinaryString(message)
+        if doLogOutput:
+            print(f"Total number of pixels: {str(len(imageArray))}")
+            print(f"Image size: {str(image.size)}")
+            print(f"Inital data: {str(imageArray[0:10])}")
+            print(f"Message to encode:\n{message}")
+        
         encodeMessage(imageArray, image.size, binaryString)
 
 def decodeMessageFromImage(imagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
@@ -42,11 +49,12 @@ def openImage(text):
     with Image.open("./media/eyes.png") as image:
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
-        print(f"Total number of pixels: {str(len(imageArray))}")
         size = image.size
-        print(f"Image size: {str(size)}")
-        print(f"Inital data: {str(imageArray[0:10])}")
-        print(f"Message to encode:\n{text}")
+        if doLogOutput:
+            print(f"Total number of pixels: {str(len(imageArray))}")
+            print(f"Image size: {str(size)}")
+            print(f"Inital data: {str(imageArray[0:10])}")
+            print(f"Message to encode:\n{text}")
         
         binaryString = convertASCIItoBinaryString(text)
         
@@ -145,7 +153,8 @@ def decodeMessage(imageArray, size):
         message = message + str(decodeChunk(list(imageArray[2*i+8]) + list(imageArray[2*i+9]), keyPadded[i]))
 
     message = convertBinaryStringToASCII(message)
-    print(f"\nDecoded message:\n{message}")
+    if doLogOutput:
+        print(f"\nDecoded message:\n{message}")
 
 def decodeChunk(chunk, key):
     """get parity of subset of chunk based on key value"""
@@ -233,8 +242,9 @@ def getMessageLength(imageArray):
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print(f"Binary length:  {str(length)}")
-    print(f"Decimal length: {str(int(length, base=2))}")
+    if doLogOutput:
+        print(f"Binary length:  {str(length)}")
+        print(f"Decimal length: {str(int(length, base=2))}")
     return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
