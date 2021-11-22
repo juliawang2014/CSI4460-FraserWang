@@ -32,7 +32,7 @@ def decodeMessageFromImage(imagePath, inputKey="0123456789ABCDEF0123456789ABCDEF
     global key
     key = inputKey
     with Image.open(imagePath) as image:
-        decodeMessage(list(image.getdata(band=None)), image.size) 
+        return decodeMessage(list(image.getdata(band=None)), image.size) 
 
 #code to switch behaviors based on mode
 def printModeTest(mode, text):
@@ -155,6 +155,7 @@ def decodeMessage(imageArray, size):
     message = convertBinaryStringToASCII(message)
     if doLogOutput:
         print(f"\nDecoded message:\n{message}")
+    return message
 
 def decodeChunk(chunk, key):
     """get parity of subset of chunk based on key value"""
