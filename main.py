@@ -9,6 +9,23 @@ import perlinNoise.perlinNoise as pn
 
 print(f"arguments:\t {sys.argv[1:]} \n")
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
+outputLocation = "./media/encoded.png"
+
+def encodeMessageIntoImage(message, imagePath, outputPath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
+    """method to encode message into image with specified message, path to image intput/output, and key"""
+    global key
+    key = inputKey
+    with Image.open(imagePath) as image:
+        imageArray = list(image.getdata(band=None))
+        binaryString = convertASCIItoBinaryString(message)
+        encodeMessage(imageArray, image.size, binaryString)
+
+def decodeMessageFromImage(imagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
+    """method to get message out of image from path, key is optional"""
+    global key
+    key = inputKey
+    with Image.open(imagePath) as image:
+        decodeMessage(list(image.getdata(band=None)), image.size) 
 
 #code to switch behaviors based on mode
 def printModeTest(mode, text):
@@ -226,7 +243,7 @@ def saveImageArrayAsImage(imageArray, size):
     image = Image.new(mode="RGB", size=size)
     image.putdata(imageArray)
     #image2.show()
-    image.save("./media/encoded.png")
+    image.save(outputLocation)
     
 def convertASCIItoBinaryString(input):
     """convert ascii string to string containing binary representation"""
