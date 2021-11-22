@@ -12,11 +12,13 @@ key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will
 outputLocation = "./media/encoded.png"
 doLogOutput = True
 
-def encodeMessageIntoImage(message, imagePath, outputPath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
+def encodeMessageIntoImage(message, inputImagePath, outputImagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
     """method to encode message into image with specified message, path to image intput/output, and key"""
     global key
     key = inputKey
-    with Image.open(imagePath) as image:
+    global outputLocation
+    outputLocation = outputImagePath
+    with Image.open(inputImagePath) as image:
         imageArray = list(image.getdata(band=None))
         binaryString = convertASCIItoBinaryString(message)
         if doLogOutput:
