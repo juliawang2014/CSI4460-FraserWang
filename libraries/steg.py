@@ -1,16 +1,40 @@
 #!/usr/bin/python
 
-#first argument is gonna be -m/mode e/encode/d/decode for Encode or Decode for now, then some sort of file input, gonna use a png image in local folder for now.
-
 from PIL import Image
 import argparse
 import sys
+import perlinNoise.perlinNoise as pn
 
-print(f"arguments:\t {sys.argv[1:]} \n")
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
+outputLocation = "./media/encoded.png"
+doLogOutput = True
 
-#code to switch behaviors based on mode
+def encodeMessageIntoImage(message, inputImagePath, outputImagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
+    """method to encode message into image with specified message, path to image intput/output, and key"""
+    global key
+    key = inputKey
+    global outputLocation
+    outputLocation = outputImagePath
+    with Image.open(inputImagePath) as image:
+        imageArray = list(image.getdata(band=None))
+        binaryString = convertASCIItoBinaryString(message)
+        if doLogOutput:
+            print(f"Total number of pixels: {str(len(imageArray))}")
+            print(f"Image size: {str(image.size)}")
+            print(f"Inital data: {str(imageArray[0:10])}")
+            print(f"Message to encode:\n{message}")
+        
+        encodeMessage(imageArray, image.size, binaryString)
+
+def decodeMessageFromImage(imagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
+    """method to get message out of image from path, key is optional"""
+    global key
+    key = inputKey
+    with Image.open(imagePath) as image:
+        return decodeMessage(list(image.getdata(band=None)), image.size) 
+
 def printModeTest(mode, text):
+    """code to switch behaviors based on mode, not used unless python program is called by itself"""
     if mode == "e" or mode == "encode":
         print("encode")
         openImage(text)
@@ -20,15 +44,17 @@ def printModeTest(mode, text):
             decodeMessage(list(image.getdata(band=None)), image.size)  
             
 def openImage(text):
-    """open our image into memory so we can encode"""
+    """open our image into memory so we can encode
+    not used unless file is called by itself"""
     with Image.open("./media/eyes.png") as image:
         #output first 10 pixels, don't want to completely clear the console output.
         imageArray = list(image.getdata(band=None))
-        print(f"Total number of pixels: {str(len(imageArray))}")
         size = image.size
-        print(f"Image size: {str(size)}")
-        print(f"Inital data: {str(imageArray[0:10])}")
-        print(f"Message to encode:\n{text}")
+        if doLogOutput:
+            print(f"Total number of pixels: {str(len(imageArray))}")
+            print(f"Image size: {str(size)}")
+            print(f"Inital data: {str(imageArray[0:10])}")
+            print(f"Message to encode:\n{text}")
         
         binaryString = convertASCIItoBinaryString(text)
         
@@ -69,14 +95,49 @@ def encodeIntoChunk(chunk, value, key):
     """chunk represents 2 pixels of imageData unrolled into an array of size 6, depending on the key value pick which parts to encode to then encode parity, change other values to random, then return list of tuples like imageArray"""
     #cases for the possible values of key
     if key == "F":
-        #special case for F key value, take parity of whole chunk
+        #special case for F key value, take parity of whole chunk after some scrambling
+        for i in range(3):
+            flipIndex = pn.PerlinNoiseFactoryWrapper(5)
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[flipIndex] = toggleBit(chunk[flipIndex], 0)
         if value != getLSBParity(chunk):
-            chunk[0] = toggleBit(chunk[0], 0)
+            randomIndex = pn.PerlinNoiseFactoryWrapper(5)
+            chunk[randomIndex] = toggleBit(chunk[randomIndex], 0)
     else:
-        #common logic for the other key values, add some randomness later
+        #common logic for the other key values, encode random value into random parity pairs after inital encoding
         firstBit, secondBit = getArrayIndicesForParityEncoding(key)
         if value != getLSBParity([chunk[firstBit], chunk[secondBit]]):
-            chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            else:
+                chunk[secondBit] = toggleBit(chunk[secondBit], 0)
+
+        #do our scrambling now    
+        indexList = [0, 1, 2, 3, 4, 5]
+        #remove the ones we already the actual data into
+        indexList.remove(firstBit)
+        indexList.remove(secondBit)
+
+        #get 2 random indexes to encode random parity into
+        firstBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
+        indexList.remove(firstBit)
+        secondBit = indexList[pn.PerlinNoiseFactoryWrapper(len(indexList) - 1)]
+        indexList.remove(secondBit)
+        parity = pn.PerlinNoiseFactoryWrapper(1)
+        if parity != getLSBParity([chunk[firstBit], chunk[secondBit]]):
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[firstBit] = toggleBit(chunk[firstBit], 0)
+            else:
+                chunk[secondBit] = toggleBit(chunk[secondBit], 0)
+
+        #2 items left in indexList, encode random parity into them
+        parity = pn.PerlinNoiseFactoryWrapper(1)
+        if parity != getLSBParity([chunk[indexList[0]], chunk[indexList[1]]]):
+            if pn.PerlinNoiseFactoryWrapper(1):
+                chunk[indexList[0]] = toggleBit(chunk[indexList[0]], 0)
+            else:
+                chunk[indexList[1]] = toggleBit(chunk[indexList[1]], 0)       
+        
         
     return [tuple(chunk[0:3]), tuple(chunk[3:6])]
     
@@ -92,7 +153,9 @@ def decodeMessage(imageArray, size):
         message = message + str(decodeChunk(list(imageArray[2*i+8]) + list(imageArray[2*i+9]), keyPadded[i]))
 
     message = convertBinaryStringToASCII(message)
-    print(f"\nDecoded message:\n{message}")
+    if doLogOutput:
+        print(f"\nDecoded message:\n{message}")
+    return message
 
 def decodeChunk(chunk, key):
     """get parity of subset of chunk based on key value"""
@@ -180,8 +243,9 @@ def getMessageLength(imageArray):
     for i in range(8):
         for j in range(3):
             length += str(imageArray[i][j] % 2)
-    print(f"Binary length:  {str(length)}")
-    print(f"Decimal length: {str(int(length, base=2))}")
+    if doLogOutput:
+        print(f"Binary length:  {str(length)}")
+        print(f"Decimal length: {str(int(length, base=2))}")
     return int(length, base=2)
     
 def saveImageArrayAsImage(imageArray, size):
@@ -190,7 +254,7 @@ def saveImageArrayAsImage(imageArray, size):
     image = Image.new(mode="RGB", size=size)
     image.putdata(imageArray)
     #image2.show()
-    image.save("./media/encoded.png")
+    image.save(outputLocation)
     
 def convertASCIItoBinaryString(input):
     """convert ascii string to string containing binary representation"""
@@ -230,10 +294,11 @@ def repeatStringToMatchLength(subject, targetLen):
     return (subject * (targetLen // len(subject) + 1))[:targetLen]
 
 def main():
+    """not used unless file is called by itself"""
     parser = argparse.ArgumentParser(description = "Steganography encode/decode")
     parser.add_argument("-m", "--mode", dest = 'mode', type = str, required = True, help = "Mode of operation, e is encode and d is decode.")
     parser.add_argument("-t", "--text", dest = 'text', type = str, required = False, help = "Message to encode, binary string")
-    
+
     args = parser.parse_args()
     printModeTest(args.mode, args.text)
 
