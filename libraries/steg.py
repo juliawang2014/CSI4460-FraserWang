@@ -3,7 +3,7 @@
 from PIL import Image
 import argparse
 import sys
-import perlinNoise.perlinNoise as pn
+import libraries.perlinNoise as pn
 
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 outputLocation = "./media/encoded.png"

@@ -1,6 +1,5 @@
-import diffieHellman.diffieHellman as diffieHellman
-import encryption.AES as AES
-import perlinNoise.perlinNoise as perlinNoise
+import libraries.diffieHellman as diffieHellman
+import libraries.AES as AES
 
 class initializationVector:
     def __init__(self, iv = 0) -> None:
