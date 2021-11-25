@@ -1,6 +1,7 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+import configparser
 
 """
 parameters = dh.generate_parameters(generator=2, key_size=512)
@@ -24,23 +25,29 @@ derived_key_2 = HKDF(
     salt=None,
     info=b'handshake data',
 ).derive(shared_key_2)
-print("Base parameters")
-print(parameters.parameter_numbers().p)
-print(parameters.parameter_numbers().g)
-print("Peer public key 1 derived parameters")
-print(peer_public_key.public_numbers().parameter_numbers.p)
-print(peer_public_key.public_numbers().parameter_numbers.g)
-print("Peer public key 2 derived parameters")
-print(peer_public_key_2.public_numbers().parameter_numbers.p)
-print(peer_public_key_2.public_numbers().parameter_numbers.g)
 """
 
-_parameters = dh.generate_parameters(generator=2, key_size=512)
+config = configparser.ConfigParser()
+
+def storeParameters():
+    parameters = dh.generate_parameters(generator=2, key_size=512)
+    pn = parameters.parameter_numbers()
+    p = pn.p
+    g = pn.g
+    y = 10
+    config['PARAMETERS'] = {'p': p, 'g': g, 'y': y}
+    with open ('parameters.config', 'w') as configfile:
+        config.write(configfile)
 
 def getSharedKey():
-    #parameters = dh.generate_parameters(generator=2, key_size=512)
-    private_key = _parameters.generate_private_key()
-    peer_public_key = _parameters.generate_private_key().public_key()
+    config.read('parameters.config')
+    p = int(config['PARAMETERS']['p'])
+    g = int(config['PARAMETERS']['g'])
+    y = int(config['PARAMETERS']['y'])
+    pn = dh.DHParameterNumbers(p, g)
+    peer_public_numbers = dh.DHPublicNumbers(y, pn)
+    peer_public_key = peer_public_numbers.public_key()
+    private_key = pn.parameters().generate_private_key()
     shared_key = private_key.exchange(peer_public_key)
     derived_key = HKDF(
         algorithm=hashes.SHA256(),
@@ -49,4 +56,3 @@ def getSharedKey():
         info=b'handshake data',
     ).derive(shared_key)
     return derived_key
-
