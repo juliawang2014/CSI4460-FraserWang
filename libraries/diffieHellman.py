@@ -29,6 +29,29 @@ derived_key_2 = HKDF(
 
 config = configparser.ConfigParser()
 
+
+#p is prime modulo, g is generator, y is public value that is recieved, and x is private value that is sent.
+p = ""
+g = ""
+y = ""
+x = ""
+
+def getParamsFromFile():
+    config.read('parameters.config')
+    global p, g, y, x
+    p = int(config['PARAMETERS']['p'])
+    g = int(config['PARAMETERS']['g'])
+    y = int(config['PARAMETERS']['y'])
+    x = int(config['PARAMETERS']['x'])
+
+def storeParamsToFile():
+    global p, g, y, x
+    config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x}
+    with open ('parameters.config', 'w') as configfile:
+        config.write(configfile)    
+    
+
+"""
 def getSharedKeyFromFile():
     config.read('parameters.config')
     sharedKey = int(config['PARAMETERS']['sharedKey'])
@@ -78,7 +101,7 @@ def startNewCommunication():
     privateKey = generateNewPrivateKey()
     publicKey = generateNewPublicKey()
     print(publicKey.private_bytes("DER","PKCS8", "NoEncryption")) 
-    
+"""    
 
 def storeParameters():
     parameters = dh.generate_parameters(generator=2, key_size=512)
