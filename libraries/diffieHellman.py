@@ -29,6 +29,18 @@ derived_key_2 = HKDF(
 
 config = configparser.ConfigParser()
 
+def getSharedKeyFromFile():
+    config.read('parameters.config')
+    sharedKey = int(config['PARAMETERS']['sharedKey'])
+    return sharedKey
+
+def storeSharedKeyToFile(sharedKey):
+    config.read('parameters.config')
+    config['PARAMETERS']['sharedKey'] = sharedKey
+    with open ('parameters.config', 'w') as configfile:
+        config.write(configfile)
+
+
 def storeParameters():
     parameters = dh.generate_parameters(generator=2, key_size=512)
     pn = parameters.parameter_numbers()
