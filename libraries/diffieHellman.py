@@ -39,6 +39,35 @@ def storeSharedKeyToFile(sharedKey):
     config['PARAMETERS']['sharedKey'] = sharedKey
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)
+        
+def getPrivateKeyFromFile():
+    config.read('parameters.config')
+    privateKey = int(config['PARAMETERS']['x'])
+    return privateKey
+        
+def storePrivateKeyToFile(privateKey):
+    config.read('parameters.config')
+    config['PARAMETERS']['x'] = privateKey
+    with open ('parameters.config', 'w') as configfile:
+        config.write(configfile)
+        
+def generateNewPrivateKey():
+    config.read('parameters.config')
+    p = int(config['PARAMETERS']['p'])
+    g = int(config['PARAMETERS']['g'])
+    pn = dh.DHParameterNumbers(p, g)
+    parameters = pn.parameters()
+    private_key = parameters.generate_private_key()
+    return private_key
+    
+def generateNewPublicKey():
+    config.read('parameters.config')
+    p = int(config['PARAMETERS']['p'])
+    g = int(config['PARAMETERS']['g'])
+    pn = dh.DHParameterNumbers(p, g)
+    parameters = pn.parameters()
+    public_key = private_key = parameters.generate_private_key()
+    
 
 
 def storeParameters():
