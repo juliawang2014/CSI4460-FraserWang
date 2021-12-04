@@ -48,6 +48,7 @@ def getSharedKey():
     peer_public_numbers = dh.DHPublicNumbers(y, pn)
     peer_public_key = peer_public_numbers.public_key()
     private_key = pn.parameters().generate_private_key()
+    print("private key: " + str(private_key))
     shared_key = private_key.exchange(peer_public_key)
     derived_key = HKDF(
         algorithm=hashes.SHA256(),
