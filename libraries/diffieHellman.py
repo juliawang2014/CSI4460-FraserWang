@@ -66,9 +66,19 @@ def generateNewPublicKey():
     g = int(config['PARAMETERS']['g'])
     pn = dh.DHParameterNumbers(p, g)
     parameters = pn.parameters()
-    public_key = private_key = parameters.generate_private_key()
+    public_key = parameters.generate_private_key()
+    return public_key
     
-
+def clearStoredPublicKeyValue():
+    config['PARAMETERS']['y'] = ""
+    with open ('parameters.config', 'w') as configfile:
+        config.write(configfile)   
+    
+def startNewCommunication():
+    privateKey = generateNewPrivateKey()
+    publicKey = generateNewPublicKey()
+    print(publicKey.private_bytes("DER","PKCS8", "NoEncryption")) 
+    
 
 def storeParameters():
     parameters = dh.generate_parameters(generator=2, key_size=512)
@@ -76,7 +86,7 @@ def storeParameters():
     p = pn.p
     g = pn.g
     y = 10
-    config['PARAMETERS'] = {'p': p, 'g': g, 'y': y}
+    config['PARAMETERS'] = {'p': p, 'g': g}
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)
 
