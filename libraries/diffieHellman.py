@@ -41,6 +41,7 @@ x = "" #private value, kept secret
 #tmp.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
 def getParamsFromFile():
+    """update the global variables with what is stored in config file"""
     config.read('parameters.config')
     global p, g, y, x
     p = int(config['PARAMETERS']['p'])
@@ -49,19 +50,23 @@ def getParamsFromFile():
     x = int(config['PARAMETERS']['x'])
 
 def storeParamsToFile():
+    """store global variables to config file"""
     global p, g, y, x
     config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x}
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)    
 
 def startNewCommunication():
+    """load params from file, then generate new private+ public key pair
+    then save configuration variables and export public key to share with other instance"""
     getParamsFromFile()
     pn = dh.DHParameterNumbers(p, g).parameters()
     privateKey = pn.generate_private_key()
-    global x
-    x = privateKey.private_numbers().x
     publicKey = privateKey.public_key()
     print(publicKey.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    global x, y
+    x = privateKey.private_numbers().x
+    y = ""
     return publicKey
 
 """
