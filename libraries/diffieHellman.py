@@ -1,6 +1,7 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import serialization
 import configparser
 
 """
@@ -31,10 +32,13 @@ config = configparser.ConfigParser()
 
 
 #p is prime modulo, g is generator, y is public value that is recieved, and x is private value that is sent.
-p = ""
-g = ""
-y = ""
-x = ""
+p = "" #prime modulo, unchanging
+g = "" #generator, unchanging
+y = "" #public value, recieved from other party
+x = "" #private value, kept secret
+
+
+#tmp.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
 def getParamsFromFile():
     config.read('parameters.config')
@@ -49,7 +53,16 @@ def storeParamsToFile():
     config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x}
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)    
-    
+
+def startNewCommunication():
+    getParamsFromFile()
+    pn = dh.DHParameterNumbers(p, g).parameters()
+    privateKey = pn.generate_private_key()
+    global x
+    x = privateKey.private_numbers().x
+    publicKey = privateKey.public_key()
+    print(publicKey.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    return publicKey
 
 """
 def getSharedKeyFromFile():
