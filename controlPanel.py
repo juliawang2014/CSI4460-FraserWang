@@ -14,8 +14,8 @@ while(active):
     mode = input("Welcome!\nEnter 1 to resume an existing session.\nEnter 2 to start a new session.\nEnter 3 to quit.\n")
     if mode == "1":
         key = diffieHellman.resumeCommunicationSession()
-        print(key)
-    if mode == "2":
+        print(f"Key: {key}")
+    elif mode == "2":
         keyToShare = diffieHellman.startNewCommunication().decode("ascii")
         #construct file name to look like camera picture from smartphone, using current date and time
         now = datetime.now()
@@ -30,8 +30,12 @@ while(active):
         file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
         print(f"\nFile found! Filename: {file}")
         sharedKey = bytes(steg.decodeMessageFromImage(file), "utf8")
-        aesKey = diffieHellman.receiveExternalKey(sharedKey)
-        print(aesKey)
+        key = diffieHellman.receiveExternalKey(sharedKey)
+        print(f"Key: {key}")
+    elif mode == "3":
+        active = False
+    else:
+        print("Invalid input, please try again.")
         
         
         
