@@ -4,8 +4,8 @@ from datetime import datetime
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import os
+import secrets
 
-ivector = b'\xd4\xef[y2\x91\x0c\x14\ry\x88\x13\xc4$\xfd&'
 msg = ""
 key = ""
 steg.doLogOutput = False
@@ -45,16 +45,20 @@ def mainLoop():
 def recieveSendMessagesLoop():
     mode = input("\nPress 1 to recieve a message, 2 to send a message, or 3 to go back.\n")
     if mode == "1":
-        cipher = AES.new(key,AES.MODE_CBC, iv=ivector)
+
         input("Waiting for image to be put into ./input, newest file will be seleted\nPlease press enter once the image is put there.\n")
         file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
         print(f"File found! Filename: {file}")
         keyForSteg = key.hex().upper()
-        messageEncrypted = steg.decodeMessageFromImage(file, inputKey=keyForSteg)
+        messageEncoded = steg.decodeMessageFromImage(file, inputKey=keyForSteg)
+        ivector = messageEncoded[0:16]
+        messageEncrypted = messageEncoded[16:]
+        cipher = AES.new(key,AES.MODE_CBC, iv=ivector)
         messageDecrypted = unpad(cipher.decrypt(messageEncrypted), AES.block_size)
         print(f"Message decoded from file:\n{messageDecrypted.decode('ascii')}")
         recieveSendMessagesLoop()
     elif mode == "2":
+        ivector = secrets.token_bytes(16)
         cipher = AES.new(key,AES.MODE_CBC, iv=ivector)
         messageToEncode = input("Please enter your message now!\n")
         messageEncrypted = cipher.encrypt(pad(bytes(messageToEncode, "ascii"), AES.block_size))
@@ -62,7 +66,7 @@ def recieveSendMessagesLoop():
         now = datetime.now()
         str = now.strftime("./output/IMG_%Y%m%d_%H%M%S.png")
         keyForSteg = key.hex().upper()
-        steg.encodeMessageIntoImage(messageEncrypted, "./media/eyes.png", str, inputKey=keyForSteg)
+        steg.encodeMessageIntoImage(ivector + messageEncrypted, "./media/eyes.png", str, inputKey=keyForSteg)
         print(f"\nMessage encoded into image stored at {str}")
         recieveSendMessagesLoop()
     elif mode == "3":

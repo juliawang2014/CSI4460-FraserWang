@@ -276,7 +276,7 @@ def convertBinaryStringToBytes(input):
     output = ""
     for i in range(0, int(len(input)), 8):
         #yeah I know the following line is a bit of a mess but hey it works
-        output  += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').hex()
+        output += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').hex()
     return bytes.fromhex(output) 
 
 def setBit(int_type, offset, value):
