@@ -67,10 +67,11 @@ def startNewCommunication():
     x = privateKey.private_numbers().x
     y = ""
     yPrivate = publicKey.public_numbers().y
-    return publicKey
+    return publicKey.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
-def receiveExternalKey(extKey):
+def receiveExternalKey(extKeyBytes):
     """load other party's public key, save config variable for that key, then compute session key"""
+    extKey = serialization.load_pem_public_key(extKeyBytes)
     global y
     y = extKey.public_numbers().y
     privateKey = dh.DHPrivateNumbers(x, dh.DHPublicNumbers(yPrivate, dh.DHParameterNumbers(p, g))).private_key()

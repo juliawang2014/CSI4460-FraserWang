@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 encryption/.DS_Store
 .DS_Store
+.parameters.config.swp
