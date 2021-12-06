@@ -2,6 +2,7 @@ import libraries.diffieHellman as diffieHellman
 import libraries.AES as AES
 import libraries.steg as steg
 from datetime import datetime
+import os
 
 ivector = ""
 msg = ""
@@ -20,7 +21,13 @@ while(active):
         now = datetime.now()
         str = now.strftime("./media/IMG_%Y%m%d_%H%M%S.png")
         steg.encodeMessageIntoImage(keyToShare, "./media/eyes.png", str)
-        print(f"\nKey encoded into image stored at {str}")
+        print(f"\nKey encoded into inital image stored at {str}\n\n")
+        input("Waiting for shared inital image from the other party to be put into the ./input folder.\nPlease press enter once the image is put there.")
+
+        #decode information from newest image located in ./input
+        #code to get newest taken from https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
+        print("\nGetting newest image in ./input....")
+        print(max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime))
         
         
         
