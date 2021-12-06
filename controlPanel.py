@@ -32,7 +32,6 @@ def mainLoop():
             file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
             print(f"\nFile found! Filename: {file}")
             sharedKey = bytes(steg.decodeMessageFromImage(file), "utf8")
-            global key
             key = diffieHellman.receiveExternalKey(sharedKey)
             print(f"Key: {key}")
         elif mode == "3":
