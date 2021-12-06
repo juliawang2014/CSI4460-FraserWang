@@ -30,15 +30,11 @@ derived_key_2 = HKDF(
 
 config = configparser.ConfigParser()
 
-
-#p is prime modulo, g is generator, y is public value that is recieved, and x is private value that is sent.
-p = "" #prime modulo, unchanging
-g = "" #generator, unchanging
-y = "" #public value, recieved from other party
-x = "" #private value, kept secret
-yPrivate = "" #y value for the pair containing our private key, used to recompute private key
-
-#tmp.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
+p = None #prime modulo, unchanging
+g = None #generator, unchanging
+y = None #public value, recieved from other party
+x = None #private value, kept secret
+yPrivate = None #y value for the pair containing our private key, used to recompute private key
 
 def getParamsFromFile():
     """update the global variables with what is stored in config file"""

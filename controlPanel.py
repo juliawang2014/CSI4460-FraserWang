@@ -6,7 +6,19 @@ msg = ""
 key = ""
 
 active = True
+while(active):
+    mode = input("Welcome!\nEnter 1 to resume an existing session.\nEnter 2 to start a new session.\nEnter 3 to quit.\n")
+    if mode == "1":
+        key = diffieHellman.resumeCommunicationSession()
+        print(key)
+    if mode == "2":
+        keyToShare = diffieHellman.startNewCommunication()
+        print(keyToShare)
+        
+        
 
+
+"""
 while(active):
     mode = input("Welcome, enter 1 to encrypt and send a new message, enter 2 to receive and decrypt a message, enter 3 to quit\n")
     if mode == "1":
@@ -32,4 +44,4 @@ while(active):
     elif mode == "3":
         active = False
     else:
-        print("Invalid input, try again.")
+        print("Invalid input, try again.")"""
