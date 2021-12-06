@@ -52,7 +52,6 @@ def getParamsFromFile():
 
 def storeParamsToFile():
     """store global variables to config file"""
-    global p, g, y, x, yPrivate
     config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x, 'yPrivate': yPrivate}
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)    
