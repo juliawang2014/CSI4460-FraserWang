@@ -7,7 +7,7 @@ import libraries.perlinNoise as pn
 
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 outputLocation = "./media/encoded.png"
-doLogOutput = True
+doLogOutput = False
 
 def encodeMessageIntoImage(message, inputImagePath, outputImagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
     """method to encode message into image with specified message, path to image intput/output, and key"""
@@ -86,8 +86,10 @@ def encodeMessage(imageArray, size, message):
     for i in range(0, len(message)*2, 2):
         working = list(imageArray[i+8]) + list(imageArray[i+9])
         imageArray[i+8:i+10] = encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])
-        
-    print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
+
+    if doLogOutput:   
+        print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
+
     saveImageArrayAsImage(imageArray, size)
     
     

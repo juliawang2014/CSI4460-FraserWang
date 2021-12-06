@@ -1,9 +1,12 @@
 import libraries.diffieHellman as diffieHellman
 import libraries.AES as AES
+import libraries.steg as steg
+from datetime import datetime
 
 ivector = ""
 msg = ""
 key = ""
+steg.doLogOutput = False
 
 active = True
 while(active):
@@ -12,8 +15,13 @@ while(active):
         key = diffieHellman.resumeCommunicationSession()
         print(key)
     if mode == "2":
-        keyToShare = diffieHellman.startNewCommunication()
-        print(keyToShare)
+        keyToShare = diffieHellman.startNewCommunication().decode("ascii")
+        #construct file name to look like camera picture from smartphone, using current date and time
+        now = datetime.now()
+        str = now.strftime("./media/IMG_%Y%m%d_%H%M%S.png")
+        steg.encodeMessageIntoImage(keyToShare, "./media/eyes.png", str)
+        print(f"\nKey encoded into image stored at {str}")
+        
         
         
 
