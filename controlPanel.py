@@ -71,6 +71,9 @@ def recieveSendMessagesLoop():
         print("Invalid input, please try again.")
         recieveSendMessagesLoop()
 
+if __name__ == "__main__":
+    mainLoop()
+
 
 """
 while(active):
