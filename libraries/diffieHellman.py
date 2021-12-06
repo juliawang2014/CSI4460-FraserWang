@@ -36,24 +36,24 @@ p = "" #prime modulo, unchanging
 g = "" #generator, unchanging
 y = "" #public value, recieved from other party
 x = "" #private value, kept secret
-privateKey = None #stores the private key object once it is generated, global so that we don't have to generate it multiple times a session
-
+yPrivate = "" #y value for the pair containing our private key, used to recompute private key
 
 #tmp.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
 def getParamsFromFile():
     """update the global variables with what is stored in config file"""
     config.read('parameters.config')
-    global p, g, y, x
+    global p, g, y, x, yPrivate
     p = int(config['PARAMETERS']['p'])
     g = int(config['PARAMETERS']['g'])
     y = int(config['PARAMETERS']['y'])
     x = int(config['PARAMETERS']['x'])
+    yPrivate = int(config['PARAMETERS']['yPrivate'])
 
 def storeParamsToFile():
     """store global variables to config file"""
-    global p, g, y, x
-    config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x}
+    global p, g, y, x, yPrivate
+    config['PARAMETERS'] = {'p': p, 'g': g, 'y': y, 'x': x, 'yPrivate': yPrivate}
     with open ('parameters.config', 'w') as configfile:
         config.write(configfile)    
 
@@ -62,18 +62,19 @@ def startNewCommunication():
     then save configuration variables and export public key to share with other instance"""
     getParamsFromFile()
     pn = dh.DHParameterNumbers(p, g).parameters()
-    global privateKey
     privateKey = pn.generate_private_key()
     publicKey = privateKey.public_key()
-    global x, y
+    global x, y, yPrivate
     x = privateKey.private_numbers().x
     y = ""
+    yPrivate = publicKey.public_numbers().y
     return publicKey
 
 def receiveExternalKey(extKey):
     """load other party's public key, save config variable for that key, then compute session key"""
     global y
     y = extKey.public_numbers().y
+    privateKey = dh.DHPrivateNumbers(x, dh.DHPublicNumbers(yPrivate, dh.DHParameterNumbers(p, g))).private_key()
     sharedKeyInit = privateKey.exchange(extKey)
     sharedKeyFinal = HKDF(
         algorithm=hashes.SHA256(),
@@ -82,9 +83,19 @@ def receiveExternalKey(extKey):
         info=b'handshake data',
     ).derive(sharedKeyInit)
     return sharedKeyFinal
-    
 
-
+def resumeCommunicationSession():
+    getParamsFromFile()
+    privateKey = dh.DHPrivateNumbers(x, dh.DHPublicNumbers(yPrivate, dh.DHParameterNumbers(p, g))).private_key()
+    publicKey = dh.DHPublicNumbers(y, dh.DHParameterNumbers(p, g)).public_key()
+    sharedKeyInit = privateKey.exchange(publicKey)
+    sharedKeyFinal = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=None,
+        info=b'handshake data',
+    ).derive(sharedKeyInit)
+    return sharedKeyFinal
 
 """
 def getSharedKeyFromFile():
