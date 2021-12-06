@@ -21,13 +21,17 @@ while(active):
         now = datetime.now()
         str = now.strftime("./media/IMG_%Y%m%d_%H%M%S.png")
         steg.encodeMessageIntoImage(keyToShare, "./media/eyes.png", str)
-        print(f"\nKey encoded into inital image stored at {str}\n\n")
+        print(f"\nKey encoded into inital image stored at {str}\n")
         input("Waiting for shared inital image from the other party to be put into the ./input folder.\nPlease press enter once the image is put there.")
 
         #decode information from newest image located in ./input
         #code to get newest taken from https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
         print("\nGetting newest image in ./input....")
-        print(max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime))
+        file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
+        print(f"\nFile found! Filename: {file}")
+        sharedKey = bytes(steg.decodeMessageFromImage(file), "utf8")
+        aesKey = diffieHellman.receiveExternalKey(sharedKey)
+        print(aesKey)
         
         
         
