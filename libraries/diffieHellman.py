@@ -36,6 +36,7 @@ p = "" #prime modulo, unchanging
 g = "" #generator, unchanging
 y = "" #public value, recieved from other party
 x = "" #private value, kept secret
+privateKey = None #stores the private key object once it is generated, global so that we don't have to generate it multiple times a session
 
 
 #tmp.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
@@ -61,13 +62,29 @@ def startNewCommunication():
     then save configuration variables and export public key to share with other instance"""
     getParamsFromFile()
     pn = dh.DHParameterNumbers(p, g).parameters()
+    global privateKey
     privateKey = pn.generate_private_key()
     publicKey = privateKey.public_key()
-    print(publicKey.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo))
     global x, y
     x = privateKey.private_numbers().x
     y = ""
     return publicKey
+
+def receiveExternalKey(extKey):
+    """load other party's public key, save config variable for that key, then compute session key"""
+    global y
+    y = extKey.public_numbers().y
+    sharedKeyInit = privateKey.exchange(extKey)
+    sharedKeyFinal = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=None,
+        info=b'handshake data',
+    ).derive(sharedKeyInit)
+    return sharedKeyFinal
+    
+
+
 
 """
 def getSharedKeyFromFile():
