@@ -42,7 +42,7 @@ def startNewCommunication():
     return publicKey.public_bytes(encoding=serialization.Encoding.PEM,format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
 def receiveExternalKey(extKeyBytes):
-    """load other party's public key, save config variable for that key, then compute session key"""
+    """load other party's public key, save config variable for that key, then compute+return session key"""
     extKey = serialization.load_pem_public_key(extKeyBytes)
     global y
     y = extKey.public_numbers().y
