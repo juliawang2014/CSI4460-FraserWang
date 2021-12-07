@@ -130,5 +130,5 @@ dmypy.json
 encryption/.DS_Store
 .DS_Store
 .parameters.config.swp
-input/
-output/
+input/*.png
+output/*.png
