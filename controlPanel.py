@@ -10,6 +10,7 @@ key = ""
 steg.doLogOutput = False
 
 def mainLoop():
+    """loop to pick between starting a new session or resuming the saved session, or altenratively exiting"""
     mode = input("Welcome!\nEnter 1 to resume an existing session.\nEnter 2 to start a new session.\nEnter 3 to quit.\n")
     if mode == "1":
         #load paramaters from paramaters.config to resume previous session that has already been set up
@@ -45,6 +46,7 @@ def mainLoop():
         mainLoop()
         
 def recieveSendMessagesLoop():
+    """loop to send/recieve messages once session is set up"""
     mode = input("\nPress 1 to recieve a message, 2 to send a message, or 3 to go back.\n")
     if mode == "1":
         #get newest file in ./input, which should contain the ivector + encrypted message
