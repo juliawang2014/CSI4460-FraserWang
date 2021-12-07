@@ -33,7 +33,7 @@ def mainLoop():
         print(f"\nFile found! Filename: {file}")
         sharedKey = bytes(steg.decodeMessageFromImage(file), "utf8")
         key = diffieHellman.receiveExternalKey(sharedKey)
-        print(f"Key: {key}")
+        print(f"Key: {key}\nCurrent session has been saved.")
         recieveSendMessagesLoop()
     elif mode == "3":
         print("Goodbye!")
