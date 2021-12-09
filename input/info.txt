@@ -1,1 +1,0 @@
-Inputs to the program shall be placed here, the file with the most recent creation date is the one that is chosen.
