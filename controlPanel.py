@@ -5,6 +5,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import os
 import secrets
+import random
 
 key = ""
 steg.doLogOutput = False
@@ -73,9 +74,9 @@ def recieveSendMessagesLoop():
         now = datetime.now()
         str = now.strftime("./output/IMG_%Y%m%d_%H%M%S.png")
         keyForSteg = key.hex().upper()
-        #encode into ./media/eyes.png 
-        #TODO: put many pictures into ./media and choose randomly from them
-        steg.encodeMessageIntoImage(ivector + messageEncrypted, "./media/eyes.png", str, inputKey=keyForSteg)
+        #encode into random file from ./media, not checked for validity so be careful!
+        carrierPath = "./media/" + random.choice(os.listdir("./media/"))
+        steg.encodeMessageIntoImage(ivector + messageEncrypted, carrierPath, str, inputKey=keyForSteg)
         print(f"\nMessage encoded into image stored at {str}")
         recieveSendMessagesLoop()
     elif mode == "3":
