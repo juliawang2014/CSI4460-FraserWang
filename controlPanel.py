@@ -27,7 +27,8 @@ def mainLoop():
         str = now.strftime("./output/IMG_%Y%m%d_%H%M%S.png")
         #encode public key into image
         #TODO: pick random image from ./media/ to encode
-        steg.encodeMessageIntoImage(keyToShare, "./media/eyes.png", str)
+        carrierPath = "./media/" + random.choice(os.listdir("./media/"))
+        steg.encodeMessageIntoImage(keyToShare, carrierPath, str)
         print(f"\nKey encoded into inital image stored at {str}\n")
         input("Waiting for shared inital image from the other party to be put into the ./input folder.\nPlease press enter once the image is put there.")
         #decode information from newest image located in ./input
