@@ -7,7 +7,8 @@ import libraries.perlinNoise as pn
 
 key = "0123456789ABCDEF0123456789ABCDEF" #testing key, 256 bits long but we will take 4 bits at a time out of it and use each 4 bit chunk for helping to encode 1 bit into the image
 outputLocation = "./media/encoded.png"
-doLogOutput = True
+doLogOutput = False
+doRawEncoding = True
 
 def encodeMessageIntoImage(message, inputImagePath, outputImagePath, inputKey="0123456789ABCDEF0123456789ABCDEF"):
     """method to encode message into image with specified message, path to image intput/output, and key"""
@@ -17,7 +18,7 @@ def encodeMessageIntoImage(message, inputImagePath, outputImagePath, inputKey="0
     outputLocation = outputImagePath
     with Image.open(inputImagePath) as image:
         imageArray = list(image.getdata(band=None))
-        binaryString = convertASCIItoBinaryString(message)
+        binaryString = convertMessagetoBinaryString(message)
         if doLogOutput:
             print(f"Total number of pixels: {str(len(imageArray))}")
             print(f"Image size: {str(image.size)}")
@@ -56,7 +57,7 @@ def openImage(text):
             print(f"Inital data: {str(imageArray[0:10])}")
             print(f"Message to encode:\n{text}")
         
-        binaryString = convertASCIItoBinaryString(text)
+        binaryString = convertMessagetoBinaryString(text)
         
         #call our three functions to modify the image data in different ways.
         #the [:] is neccessary to pass the list by value instead of reference, avoiding changing it.
@@ -86,8 +87,10 @@ def encodeMessage(imageArray, size, message):
     for i in range(0, len(message)*2, 2):
         working = list(imageArray[i+8]) + list(imageArray[i+9])
         imageArray[i+8:i+10] = encodeIntoChunk(working, int(message[i//2]), keyPadded[i//2])
-        
-    print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
+
+    if doLogOutput:   
+        print(f"\nData with encoded binary message: {str(imageArray[0:10])}")
+
     saveImageArrayAsImage(imageArray, size)
     
     
@@ -152,7 +155,9 @@ def decodeMessage(imageArray, size):
     for i in range(length):
         message = message + str(decodeChunk(list(imageArray[2*i+8]) + list(imageArray[2*i+9]), keyPadded[i]))
 
-    message = convertBinaryStringToASCII(message)
+    message = convertBinaryStringToBytes(message)
+    if message.isascii():
+        message = message.decode("ascii")
     if doLogOutput:
         print(f"\nDecoded message:\n{message}")
     return message
@@ -256,23 +261,23 @@ def saveImageArrayAsImage(imageArray, size):
     #image2.show()
     image.save(outputLocation)
     
-def convertASCIItoBinaryString(input):
-    """convert ascii string to string containing binary representation"""
+def convertMessagetoBinaryString(input):
+    """convert ascii string or raw bytes (depending on if it is an ascii string) to string containing binary representation"""
     #take each character and pad to be 8 bits, add to output string and return entire string.
     output = ""
-    input = input.encode("ascii")
+    if input.isascii():
+        input = input.encode("ascii")
     for char in input:
         output += bin(char)[2:].zfill(8)
     return output
-    
-def convertBinaryStringToASCII(input):
+
+def convertBinaryStringToBytes(input):
     """covert binary string into ASCII equivalent"""
     output = ""
     for i in range(0, int(len(input)), 8):
         #yeah I know the following line is a bit of a mess but hey it works
-        output  += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').decode("ascii")
-    return output 
-
+        output += int(input[i:i+8], base=2).to_bytes(1, byteorder='big').hex()
+    return bytes.fromhex(output) 
 
 def setBit(int_type, offset, value):
     """following 2 functions derived from https://wiki.python.org/moin/BitManipulation, this one sets a specific bit"""

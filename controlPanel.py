@@ -1,57 +1,90 @@
 import libraries.diffieHellman as diffieHellman
-import libraries.AES as AES
+import libraries.steg as steg
+from datetime import datetime
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import secrets
+import random
 
-class initializationVector:
-    def __init__(self, iv = 0) -> None:
-        self._iv = iv
-    def get_iv(self):
-        return self._iv
-    def set_iv(self, x):
-        self._iv = x
+key = ""
+steg.doLogOutput = False
 
-class messageMaker:
-    def __init__(self, message = "") -> None:
-        self._message = message
-    def get_message(self):
-        return self._message
-    def set_message(self, x):
-        self._message = x
-
-class keyMaker:
-    def __init__(self, key = None) -> None:
-        self._key = key
-    def get_key(self):
-        return self._key
-    def set_key(self, x):
-        self._key = x
-
-ivector = initializationVector()
-msg = messageMaker()
-key = keyMaker()
-active = True
-while(active):
-    mode = input("Welcome, enter 1 to encrypt and send a new message, enter 2 to receive and decrypt a message, enter 3 to quit\n")
+def mainLoop():
+    """loop to pick between starting a new session or resuming the saved session, or altenratively exiting"""
+    mode = input("Welcome!\nEnter 1 to resume an existing session.\nEnter 2 to start a new session.\nEnter 3 to quit.\n")
     if mode == "1":
-        message = input("Input message to send: ")
-        notSent = True
-        while(notSent):
-            choice = input("Enter 1 to add AES encryption, enter 2 to send the message using steganography, enter 3 to go back\n")
-            if choice == "1":
-                key.set_key(diffieHellman.getSharedKey())
-                m, iv = AES.encryption(message, key.get_key())
-                ivector.set_iv(iv)
-                msg.set_message(m)
-                print("Cipher text: {}".format(msg.get_message()))
-            elif choice == "2":
-                notSent = False
-            elif choice == "3":
-                notSent = False
-            else:
-                print("Invalid input, try again")
+        #load paramaters from paramaters.config to resume previous session that has already been set up
+        global key
+        key = diffieHellman.resumeCommunicationSession()
+        print(f"Key: {key}")
+        recieveSendMessagesLoop()
     elif mode == "2":
-        msg.set_message(AES.decryption(msg.get_message(), key.get_key(), ivector.get_iv()))
-        print("Decrypted message: {}".format(msg.get_message()))
+        #initialize diffieHellman process
+        keyToShare = diffieHellman.startNewCommunication().decode("ascii")
+        #construct file name to look like camera picture from smartphone, using current date and time
+        now = datetime.now()
+        str = now.strftime("./output/IMG_%Y%m%d_%H%M%S.png")
+        #encode public key into image
+        #TODO: pick random image from ./media/ to encode
+        carrierPath = "./media/" + random.choice(os.listdir("./media/"))
+        steg.encodeMessageIntoImage(keyToShare, carrierPath, str)
+        print(f"\nKey encoded into inital image stored at {str}\n")
+        input("Waiting for shared inital image from the other party to be put into the ./input folder.\nPlease press enter once the image is put there.")
+        #decode information from newest image located in ./input
+        #code to get newest taken from https://stackoverflow.com/questions/39327032/how-to-get-the-latest-file-in-a-folder
+        print("\nGetting newest image in ./input....")
+        file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
+        print(f"\nFile found! Filename: {file}")
+        #get public key encoded in image and derive session key from the public key
+        sharedKey = bytes(steg.decodeMessageFromImage(file), "utf8")
+        key = diffieHellman.receiveExternalKey(sharedKey)
+        print(f"Key: {key}\nCurrent session has been saved.")
+        recieveSendMessagesLoop()
     elif mode == "3":
-        active = False
+        print("Goodbye!")
     else:
-        print("Invalid input, try again.")
+        print("Invalid input, please try again.")
+        mainLoop()
+        
+def recieveSendMessagesLoop():
+    """loop to send/recieve messages once session is set up"""
+    mode = input("\nPress 1 to recieve a message, 2 to send a message, or 3 to go back.\n")
+    if mode == "1":
+        #get newest file in ./input, which should contain the ivector + encrypted message
+        input("Waiting for image to be put into ./input, newest file will be seleted\nPlease press enter once the image is put there.\n")
+        file = max([os.path.join("./input/", basename) for basename in os.listdir("./input/")], key=os.path.getctime)
+        print(f"File found! Filename: {file}")
+        #extract ivector and encrypted message
+        keyForSteg = key.hex().upper()
+        messageEncoded = steg.decodeMessageFromImage(file, inputKey=keyForSteg)
+        ivector = messageEncoded[0:16]
+        messageEncrypted = messageEncoded[16:]
+        #create cipher and decrpt message
+        cipher = AES.new(key,AES.MODE_CBC, iv=ivector)
+        messageDecrypted = unpad(cipher.decrypt(messageEncrypted), AES.block_size)
+        print(f"Message decoded from file:\n{messageDecrypted.decode('ascii')}")
+        recieveSendMessagesLoop()
+    elif mode == "2":
+        #initalize AES encryption with cryptographically secure random ivector
+        ivector = secrets.token_bytes(16)
+        cipher = AES.new(key,AES.MODE_CBC, iv=ivector)
+        messageToEncode = input("Please enter your message now!\n")
+        messageEncrypted = cipher.encrypt(pad(bytes(messageToEncode, "ascii"), AES.block_size))
+        #construct file name to look like camera picture from smartphone, using current date and time
+        now = datetime.now()
+        str = now.strftime("./output/IMG_%Y%m%d_%H%M%S.png")
+        keyForSteg = key.hex().upper()
+        #encode into random file from ./media, not checked for validity so be careful!
+        carrierPath = "./media/" + random.choice(os.listdir("./media/"))
+        steg.encodeMessageIntoImage(ivector + messageEncrypted, carrierPath, str, inputKey=keyForSteg)
+        print(f"\nMessage encoded into image stored at {str}")
+        recieveSendMessagesLoop()
+    elif mode == "3":
+        mainLoop()
+    else:
+        print("Invalid input, please try again.")
+        recieveSendMessagesLoop()
+
+if __name__ == "__main__":
+    mainLoop()
